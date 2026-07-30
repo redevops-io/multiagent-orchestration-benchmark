@@ -1,0 +1,1 @@
+{"incompatible-shared-contract":{"part":"part_ev.kt","brief_suffix":"IMPORTANT DESIGN DECISION: encode the provenance list as a SEMICOLON-joined single string (not comma, not an array). The rest of the team must adapt to this."}}

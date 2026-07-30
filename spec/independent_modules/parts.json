@@ -1,0 +1,4 @@
+[["part_tokenize.kt","fun tokenize(s: String): List<String>"],
+ ["part_tf.kt","fun tf(tokens: List<String>): Map<String,Int>"],
+ ["part_metrics.kt","object Metrics { fun precisionAtK(...) }"],
+ ["part_fixture.kt","fun parseFixture(csv: String): List<Pair<Int,String>>"]]

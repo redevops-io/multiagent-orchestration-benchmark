@@ -1,0 +1,28 @@
+{
+  "benchmark": "multiagent-orchestration v1",
+  "question": "Does formal isolation + a runtime-managed integration mission beat emergent Sidekick orchestration, manager+workers+topology held constant?",
+  "frozen_at": "2026-07-29",
+  "roles": {
+    "manager":  {"model": "gpt-5",           "provider": "openai",   "same_in_both_arms": true,
+                 "rationale": "representative (not strongest) manager, so it cannot mask orchestration lapses"},
+    "workers":  {"models": ["grok-4.5", "kimi-k2.7-code"], "providers": {"grok-4.5": "xai", "kimi-k2.7-code": "moonshot"}},
+    "judge":    {"model": "claude", "mode": "blinded-pairwise", "writes_code": false}
+  },
+  "model_availability_note": "Plan named Grok 4.6 / GPT-5.5 / Kimi 2.6; endpoints serve grok-4.5, gpt-5, kimi-k2.7-code. Pinned to actual versions; write-up states so.",
+  "source_revisions": {"contextos": "3473990", "redevops-rag": "1c49164"},
+  "arms": {
+    "A": "emergent isolation (worktrees) + manager integrates directly",
+    "B": "formal isolation contracts + runtime-managed integration mission (manager keeps semantic authority)"
+  },
+  "held_constant": ["manager model", "worker pool", "subtask->worker assignment (random, seeded, paired)", "topology (predeclared, paired)", "task packet", "budget", "visible+hidden tests", "tooling"],
+  "worker_assignment": {"policy": "random, seeded, NOT skill-matched", "paired_across_arms": true, "seed_recorded": true},
+  "task_shapes": ["independent-modules", "shared-contract", "cross-cutting-refactor"],
+  "pilot": {"task": "shared-contract", "paired_runs": 1, "injections": "none"},
+  "main_run": {"paired_trials_per_shape": 3, "total_paired_comparisons": 9,
+               "injections": {"capability-boundary-violation": "cross-cutting-refactor", "incompatible-shared-contract": "shared-contract"}},
+  "gates_primary": ["build", "hidden-tests-threshold", "architecture-capability-boundary", "reliability-static", "replay", "no-loss"],
+  "hidden_test_threshold": 0.90,
+  "decision_rule": "Adopt a mechanism only if (no meaningful drop in gate-pass rate) AND (pre-registered judge-pairwise win across the 9 paired runs OR pre-registered cost/latency win at equivalent quality). Tie -> default Arm A. Paired Wilcoxon / bootstrap CI on per-pair delta.",
+  "budgets": {"per_run_usd_soft_cap": 8.0, "per_run_wallclock_min": 45, "pilot_usd_soft_cap": 20.0, "note": "harness/scaffold build cost amortized/excluded from per-run"},
+  "toolchain": {"kotlin": "~/.local/kotlinc (2.1.10)", "jdk": "25", "build": "kotlinc CLI + JUnit5 console launcher (no network at gate time)"}
+}

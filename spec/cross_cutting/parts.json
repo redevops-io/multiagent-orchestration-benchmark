@@ -1,0 +1,3 @@
+[["part_retriever.kt","the Retriever interface { fun retrieve(query: String, k: Int): List<String> }"],
+ ["part_rag.kt","class RagRetriever(corpus: List<String>) : Retriever ranking corpus by query-token overlap"],
+ ["part_planner.kt","class Planner(retriever: Retriever) with fun answer(query): String using the INJECTED retriever, returning the top doc or 'no result'"]]

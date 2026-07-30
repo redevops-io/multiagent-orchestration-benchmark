@@ -1,0 +1,6 @@
+runs/
+*.pyc
+__pycache__/
+.sk*/
+.env
+*.key

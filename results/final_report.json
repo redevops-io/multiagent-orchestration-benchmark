@@ -1,0 +1,92 @@
+{
+  "n_paired": 11,
+  "shapes": [
+    "independent_modules",
+    "shared_contract",
+    "cross_cutting"
+  ],
+  "gate_pass": {
+    "A": "11/11",
+    "B": "11/11"
+  },
+  "manager_usd_total": {
+    "A": 0.318,
+    "B": 0.32
+  },
+  "worker_secs_mean": {
+    "A": 243,
+    "B": 216
+  },
+  "worker_secs_median": {
+    "A": 116,
+    "B": 119
+  },
+  "worker_secs_max": {
+    "A": 1068.2,
+    "B": 534.7
+  },
+  "blinded_quality_wins": {
+    "A": 5,
+    "B": 5,
+    "tie": 1
+  },
+  "per_pair": [
+    {
+      "tag": "cross_cutting_seed42",
+      "quality_winner": "tie"
+    },
+    {
+      "tag": "cross_cutting_seed43",
+      "quality_winner": "A"
+    },
+    {
+      "tag": "cross_cutting_seed44",
+      "quality_winner": "B"
+    },
+    {
+      "tag": "cross_cutting_seed42_inj-capability-boundary-violation",
+      "quality_winner": "B"
+    },
+    {
+      "tag": "independent_modules_seed42",
+      "quality_winner": "A"
+    },
+    {
+      "tag": "independent_modules_seed43",
+      "quality_winner": "B"
+    },
+    {
+      "tag": "independent_modules_seed44",
+      "quality_winner": "B"
+    },
+    {
+      "tag": "shared_contract_seed42",
+      "quality_winner": "A"
+    },
+    {
+      "tag": "shared_contract_seed43",
+      "quality_winner": "A"
+    },
+    {
+      "tag": "shared_contract_seed44",
+      "quality_winner": "B"
+    },
+    {
+      "tag": "shared_contract_seed42_inj-incompatible-shared-contract",
+      "quality_winner": "A"
+    }
+  ],
+  "manager": "gpt-5 (both arms)",
+  "workers": [
+    "grok-4.5",
+    "kimi-k2.7-code"
+  ],
+  "judge": "claude (blinded, pairwise)",
+  "caveats": [
+    "n=11 paired (3 shapes x3 + 2 injections)",
+    "gates identical both arms every run \u2014 no discrimination there",
+    "worker token-cost NOT metered (manager tokens + worker latency only)",
+    "single judge family (blinded, writes no code)",
+    "small N; toy-scale Kotlin tasks; one manager model"
+  ]
+}

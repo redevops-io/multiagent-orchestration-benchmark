@@ -1,0 +1,2 @@
+[["part_goal.kt","the Goal data class"],["part_cap.kt","the Capability data class"],
+ ["part_ev.kt","the EvidenceArtifact data class"],["part_serde.kt","the Serde object (all encode/decode) + SerdeError"]]

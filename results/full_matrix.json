@@ -1,0 +1,310 @@
+[
+  {
+    "tag": "cross_cutting_seed42",
+    "shape": "cross_cutting",
+    "seed": 42,
+    "injection": null,
+    "A": {
+      "build": true,
+      "tests_pass": 5,
+      "tests_total": 5,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 5,
+      "tests_total": 5,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.0113,
+    "B_usd": 0.0108,
+    "A_secs": 108.0,
+    "B_secs": 83.2
+  },
+  {
+    "tag": "cross_cutting_seed43",
+    "shape": "cross_cutting",
+    "seed": 43,
+    "injection": null,
+    "A": {
+      "build": true,
+      "tests_pass": 5,
+      "tests_total": 5,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 5,
+      "tests_total": 5,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.0121,
+    "B_usd": 0.0125,
+    "A_secs": 95.6,
+    "B_secs": 93.0
+  },
+  {
+    "tag": "cross_cutting_seed44",
+    "shape": "cross_cutting",
+    "seed": 44,
+    "injection": null,
+    "A": {
+      "build": true,
+      "tests_pass": 5,
+      "tests_total": 5,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 5,
+      "tests_total": 5,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.0136,
+    "B_usd": 0.0085,
+    "A_secs": 105.1,
+    "B_secs": 91.7
+  },
+  {
+    "tag": "cross_cutting_seed42_inj-capability-boundary-violation",
+    "shape": "cross_cutting",
+    "seed": 42,
+    "injection": "capability-boundary-violation",
+    "A": {
+      "build": true,
+      "tests_pass": 5,
+      "tests_total": 5,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 5,
+      "tests_total": 5,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.0178,
+    "B_usd": 0.0179,
+    "A_secs": 1068.2,
+    "B_secs": 120.4
+  },
+  {
+    "tag": "independent_modules_seed42",
+    "shape": "independent_modules",
+    "seed": 42,
+    "injection": null,
+    "A": {
+      "build": true,
+      "tests_pass": 10,
+      "tests_total": 10,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 10,
+      "tests_total": 10,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.0184,
+    "B_usd": 0.0125,
+    "A_secs": 95.5,
+    "B_secs": 104.1
+  },
+  {
+    "tag": "independent_modules_seed43",
+    "shape": "independent_modules",
+    "seed": 43,
+    "injection": null,
+    "A": {
+      "build": true,
+      "tests_pass": 10,
+      "tests_total": 10,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 10,
+      "tests_total": 10,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.0091,
+    "B_usd": 0.0075,
+    "A_secs": 115.9,
+    "B_secs": 119.1
+  },
+  {
+    "tag": "independent_modules_seed44",
+    "shape": "independent_modules",
+    "seed": 44,
+    "injection": null,
+    "A": {
+      "build": true,
+      "tests_pass": 10,
+      "tests_total": 10,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 10,
+      "tests_total": 10,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.0156,
+    "B_usd": 0.0106,
+    "A_secs": 116.0,
+    "B_secs": 103.2
+  },
+  {
+    "tag": "shared_contract_seed42",
+    "shape": "shared_contract",
+    "seed": 42,
+    "injection": null,
+    "A": {
+      "build": true,
+      "tests_pass": 8,
+      "tests_total": 8,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 8,
+      "tests_total": 8,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.038,
+    "B_usd": 0.056,
+    "A_secs": 124.9,
+    "B_secs": 320.1
+  },
+  {
+    "tag": "shared_contract_seed43",
+    "shape": "shared_contract",
+    "seed": 43,
+    "injection": null,
+    "A": {
+      "build": true,
+      "tests_pass": 8,
+      "tests_total": 8,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 8,
+      "tests_total": 8,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.0686,
+    "B_usd": 0.0669,
+    "A_secs": 245.6,
+    "B_secs": 534.7
+  },
+  {
+    "tag": "shared_contract_seed44",
+    "shape": "shared_contract",
+    "seed": 44,
+    "injection": null,
+    "A": {
+      "build": true,
+      "tests_pass": 8,
+      "tests_total": 8,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 8,
+      "tests_total": 8,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.0621,
+    "B_usd": 0.0701,
+    "A_secs": 226.1,
+    "B_secs": 342.6
+  },
+  {
+    "tag": "shared_contract_seed42_inj-incompatible-shared-contract",
+    "shape": "shared_contract",
+    "seed": 42,
+    "injection": "incompatible-shared-contract",
+    "A": {
+      "build": true,
+      "tests_pass": 8,
+      "tests_total": 8,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "B": {
+      "build": true,
+      "tests_pass": 8,
+      "tests_total": 8,
+      "arch_ok": true,
+      "correctness": true,
+      "build_err": "",
+      "gate_pass": true
+    },
+    "A_usd": 0.0509,
+    "B_usd": 0.0468,
+    "A_secs": 374.8,
+    "B_secs": 465.1
+  }
+]
