@@ -1,5 +1,7 @@
 # Multi-Agent Orchestration Benchmark
 
+[![NVIDIA Inception](https://img.shields.io/badge/NVIDIA-Inception%20Program%20Member-76B900.svg)](https://www.nvidia.com/en-us/startups/)
+
 Does **formal runtime-managed orchestration** (isolation contracts + a runtime *integration mission*)
 actually beat **emergent supervisor-led orchestration** (one strong manager decomposing work, running
 parallel workers, and integrating their output) — for real software-engineering tasks?
