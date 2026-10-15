@@ -2,6 +2,36 @@
 
 [![NVIDIA Inception](https://img.shields.io/badge/NVIDIA-Inception%20Program%20Member-76B900.svg)](https://www.nvidia.com/en-us/startups/)
 
+**What it does.** A controlled, re-runnable benchmark (harness, specs, results, write-up) that asks one question: does formal,
+runtime-managed orchestration beat a strong supervisor decomposing and integrating work, for small Kotlin software-engineering tasks?
+
+**Who it's for.** Anyone deciding whether multi-agent orchestration machinery is worth adding to a roadmap, and reviewers who want
+to re-check the gates and raw results.
+
+**Maturity: internally reproduced** research result. Committed results, no tags or releases; not externally reproduced. See [STATUS.md](STATUS.md).
+
+**Positioning (read this next to ReDevOps product copy).** The write-up's own conclusion is: *"the evidence does not support adopting
+formal runtime-managed orchestration as a blanket mechanism."* Its stated scope is narrow: *"This is a **mechanism test, not a leaderboard**,
+and it is small"*, *"**N is small** (11 paired)"*, Kotlin tasks that are *"toy-scale"*, *"one judge family"*, *"one manager model"*, and
+*"worker token cost wasn't metered"*. It therefore says nothing about other task types, larger refactors, or governed-runtime properties
+(authority, approval, replay, audit) that this benchmark did not measure. Label: **Internally reproduced** (`results/final_report.json`,
+`results/full_matrix.json`; not re-run for this README). Full text: [writeup/does-formal-orchestration-help.md](writeup/does-formal-orchestration-help.md).
+
+**Status and ownership.** Owned by ReDevOps; research repo (default branch `master`). Last commit 2026-09-25; 6 commits between
+2026-07-15 and 2026-10-15 (GitHub API). Questions: GitHub Issues ([CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md)).
+
+**3-minute example** (the first step is the only one needing no API keys; it needs `kotlinc` and a JDK 17+):
+
+```bash
+python3 validate_gates.py     # re-checks the deterministic gates against reference solutions; no API keys, no model calls
+```
+
+A full paired trial (`python3 harness/bench.py <shape> <seed>`) needs API keys for three model providers and is not a 3-minute task; see "Reproduce".
+
+**Evidence.** [results/final_report.json](results/final_report.json), [results/full_matrix.json](results/full_matrix.json), [writeup/does-formal-orchestration-help.md](writeup/does-formal-orchestration-help.md).
+
+**Limitations.** See the Positioning paragraph and the write-up's "What would change the verdict" section.
+
 Does **formal runtime-managed orchestration** (isolation contracts + a runtime *integration mission*)
 actually beat **emergent supervisor-led orchestration** (one strong manager decomposing work, running
 parallel workers, and integrating their output) — for real software-engineering tasks?
@@ -66,7 +96,7 @@ python3 harness/bench.py cross_cutting 42 capability-boundary-violation   # with
 # results land in runs/<tag>/summary.json (runs/ is gitignored)
 ```
 
-Workers are driven through the [`sidekick`](https://github.com/redevops-io) CLI (a local coding-agent
+Workers are driven through the [`sidekick`](https://github.com/redevops-io/sidekick) CLI (a local coding-agent
 orchestrator: `--provider grok --grok-model/-base-url/-key`, worktree-isolated). Point `--grok-base-url`
 at any OpenAI-compatible endpoint to swap worker models.
 
