@@ -478,3 +478,11 @@ SCENARIOS = {
     "compaction_fuzz": (s4_compaction_fuzz, 40),
     "projects_routes": (s5_projects_routes, 1),
 }
+
+
+def _register_agent_loop() -> None:
+    from .agent_loop import s6_agent_in_the_loop
+    SCENARIOS["agent_in_the_loop"] = (s6_agent_in_the_loop, 30)
+
+
+_register_agent_loop()
