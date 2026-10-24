@@ -62,6 +62,19 @@ jobs:
         env:
           RUNNER_IMAGE_DIGEST: ${{ runner.os }}-${{ runner.arch }}-${{ env.ImageVersion }}
         run: python runtime_adversarial/run_lane.py --agentic-os agentic-os --agent-harness agent-harness --context-runtime context-runtime --require-all --out "$RUNNER_TEMP/runtime_adversarial.json"
+      - name: Control for the false-denial counters (an over-denying guard must be safe AND be caught)
+        run: |
+          GOVERNED_OVERDENY=1 python governed/run_governed.py --agentic-os agentic-os --agent-harness agent-harness --context-runtime context-runtime \
+            --only child_agent_tree agent_in_the_loop --seeds 12 --out "$RUNNER_TEMP/overdeny.json"
+          python - <<'PY'
+          import json, os
+          d = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "overdeny.json")))["scenarios"]
+          for name in ("child_agent_tree", "agent_in_the_loop"):
+              r = d[name]
+              assert r["violations"] == 0, (name, "a guard that refuses everything is safe: no safety check should fail", r["first_violations"])
+              assert r["false_denial_rate"] is not None and r["false_denial_rate"] >= 0.9, (name, "the false-denial counter did not notice an over-denying guard", r["false_denial_rate"])
+              print(name, "over-denial detected:", r["legitimate_refused"], "of", r["legitimate_actions"])
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:

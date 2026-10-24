@@ -7,7 +7,9 @@ It does three things the suite alone does not:
   1. Refuses to run against a checkout that is not the pinned revision (PINS.json), unless told to, and records what it ran against.
   2. Writes a run manifest in the common shape every lane publishes (suite, revisions, seed, runner, times, evidence digests, status, ...). A scenario that was skipped or could not run is `not_tested`.
   3. Maps each line of the plan's runtime-adversarial families (coverage.json) to what actually exists: a governed scenario that passed, a test named for it in the pinned agentic-os, or nothing. Every reference
-     is checked (the scenario is registered, the named test exists in the checkout). The result is three counts per family, never a single score, and a false-denial rate is reported as not measured.
+     is checked (the scenario is registered, the named test exists in the checkout). The result is three counts per family, never a single score.
+  4. Reports the FALSE-DENIAL rate where a scenario counts it: of the actions an oracle-side predicate says were legitimate, how many the system refused (controls.json says what the predicate is, per scenario).
+     A scenario that does not count legitimate actions is reported as not measured, never as zero.
 
 Offline, deterministic, no model calls. Exit 1 on any scenario violation, 2 if a scenario could not run (or was skipped with --require-all), 3 if a checkout is not the pinned revision."""
 from __future__ import annotations
@@ -116,6 +118,19 @@ def build_manifest(pins: dict, heads: dict, seeds: int, rc: int, start: str, end
             "not_tested": {"skipped_scenarios": skipped, "errored_scenarios": errored}, "require_all": require_all}
 
 
+def false_denials(scen: dict) -> dict:
+    """The false-denial rate per scenario from the counters the suite recorded. No counter (or no legitimate action seen) is `not measured`, never 0."""
+    out = {}
+    for n in sorted(scen):
+        r = scen[n]
+        total, refused = r.get("legitimate_actions"), r.get("legitimate_refused")
+        if r.get("skipped") or r.get("error") or not total:
+            out[n] = "not measured"
+        else:
+            out[n] = {"legitimate_actions": total, "refused": refused, "rate": round(refused / total, 4), "first_refusals": list(r.get("first_false_denials") or [])[:3]}
+    return out
+
+
 def manifest_problems(m: dict) -> list:
     return [f"missing {k}" for k in REQUIRED_MANIFEST if k not in m or m[k] in (None, "", [], {})]
 
@@ -160,10 +175,11 @@ def main() -> int:
         manifest["unpinned"] = mismatched
     report = {"lane": "runtime_adversarial", "manifest": manifest, "manifest_problems": manifest_problems(manifest),
               "scenarios": {n: {k: scen[n].get(k) for k in ("seeds", "checks", "violations", "skipped", "error", "seconds")} for n in sorted(scen)},
+              "false_denials": {"by_scenario": false_denials(scen), "note": "a refusal of an action the oracle's predicate calls legitimate; a rate to read, not a violation; per-scenario definitions are in controls.json"},
               "scenario_controls": {n: controls["scenarios"].get(n, "not declared") for n in sorted(scen)}, "controls_note": controls["note"],
-              "coverage": cov, "false_denial_rate": "not measured: no scenario counts legitimate actions that were wrongly refused",
+              "coverage": cov,
               "not_built": ["multi-model and multi-replica scheduled tests", "container and network-policy tests", "image pinning and log-chain checks", "retrieval ACL tests (they belong to the context-runtime and RAG repositories)",
-                            "a measured false-denial rate", "traces and policy decisions in the results file"],
+                            "false-denial counting outside the four scenarios that have it (see false_denials)", "traces and policy decisions in the results file"],
               "no_aggregate": "no score is combined across scenarios, families or lanes"}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")

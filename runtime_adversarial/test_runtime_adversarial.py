@@ -50,11 +50,13 @@ def test_every_governed_scenario_a_mapping_names_is_registered():
         assert set(i["governed"]) <= reg, i["id"]
 
 
-def test_every_registered_scenario_declares_its_controls_and_none_claims_a_false_denial_rate():
+def test_every_registered_scenario_declares_its_controls_and_only_instrumented_ones_claim_a_false_denial_rate():
     assert set(CONTROLS["scenarios"]) == set(S.SCENARIOS)
+    measured = {n for n, c in CONTROLS["scenarios"].items() if c["false_denial_rate_measured"]}
+    assert measured == {"child_agent_tree", "projects_routes", "agent_in_the_loop", "provider_reconciliation"}
     for name, c in CONTROLS["scenarios"].items():
-        assert set(c) == set(KEYS), name
-        assert c["false_denial_rate_measured"] is False, "no scenario measures a false-denial rate: do not claim it until one does"
+        assert set(c) - {"legitimacy"} == set(KEYS), name
+        assert bool(c.get("legitimacy")) == c["false_denial_rate_measured"], f"{name}: a scenario that measures false denials must say what 'legitimate' means, and one that does not must not"
 
 
 def test_the_pins_are_full_commit_hashes_for_all_three_sources():
@@ -196,4 +198,28 @@ def test_an_errored_scenario_exits_two(tmp_path):
 
 def test_the_report_states_what_is_not_measured_and_not_built(tmp_path):
     _, rep, _ = run_cli(tmp_path, GOOD, "--allow-unpinned")
-    assert rep["false_denial_rate"].startswith("not measured") and rep["not_built"] and "no score is combined" in rep["no_aggregate"]
+    assert rep["not_built"] and "no score is combined" in rep["no_aggregate"]
+    assert all(v == "not measured" for v in rep["false_denials"]["by_scenario"].values())          # GOOD has no counters: not measured, never zero
+
+
+# ───────────────────────── false denials ─────────────────────────
+def test_the_result_counts_legitimate_actions_and_keeps_the_refused_ones_with_their_reasons():
+    r = S.Result()
+    assert r.legit(True, "ok") is True and r.legit(False, "refused: reason x") is False
+    assert r.legit_total == 2 and r.legit_refused == ["refused: reason x"]
+
+
+def test_a_false_denial_rate_is_reported_where_counted_and_not_measured_where_not_never_zero():
+    scen = {"a": {"legitimate_actions": 40, "legitimate_refused": 1, "first_false_denials": ["seed 3: x"]}, "b": {"legitimate_actions": 0, "legitimate_refused": 0},
+            "c": {}, "d": {"legitimate_actions": 10, "legitimate_refused": 0, "skipped": "no fastapi"}, "e": {"legitimate_actions": 10, "legitimate_refused": 0, "error": "boom"}}
+    out = RL.false_denials(scen)
+    assert out["a"] == {"legitimate_actions": 40, "refused": 1, "rate": 0.025, "first_refusals": ["seed 3: x"]}
+    assert out["b"] == out["c"] == out["d"] == out["e"] == "not measured"
+
+
+def test_the_cli_report_carries_the_rates_from_the_suite_results(tmp_path):
+    g = json.loads(json.dumps(GOOD))
+    g["scenarios"]["child_agent_tree"].update({"legitimate_actions": 100, "legitimate_refused": 4, "first_false_denials": ["seed 1: step 2"]})
+    _, rep, _ = run_cli(tmp_path, g, "--allow-unpinned")
+    fd = rep["false_denials"]["by_scenario"]
+    assert fd["child_agent_tree"]["rate"] == 0.04 and fd["goal_loop_chaos"] == "not measured"

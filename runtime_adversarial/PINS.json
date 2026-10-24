@@ -1,9 +1,24 @@
 {
   "note": "The lane runs against these exact revisions, so a result names what produced it. governed.yml runs the same suite against the default branches to catch drift; bump these deliberately, in a pull request, after reading what changed.",
   "sources": {
-    "agentic-os": {"repo": "redevops-io/agentic-os", "revision": "52a99ef163b4580608e8e0aba0d157afe2bf3c7c", "as_of": "2026-10-24", "ref": "main"},
-    "agent-harness": {"repo": "redevops-io/agent-harness", "revision": "6b8ba3a596a5e2caf0fdf009f2af013517591662", "as_of": "2026-10-24", "ref": "HEAD"},
-    "context-runtime": {"repo": "redevops-io/context-runtime", "revision": "0811760494ff00af470c898dbaffd135260c0c85", "as_of": "2026-10-24", "ref": "v4 (branch)"}
+    "agentic-os": {
+      "repo": "redevops-io/agentic-os",
+      "revision": "54d3dc2b22f2227b2374fd4e24d6dbf6a9e0f9ab",
+      "as_of": "2026-10-24",
+      "ref": "main"
+    },
+    "agent-harness": {
+      "repo": "redevops-io/agent-harness",
+      "revision": "6b8ba3a596a5e2caf0fdf009f2af013517591662",
+      "as_of": "2026-10-24",
+      "ref": "HEAD"
+    },
+    "context-runtime": {
+      "repo": "redevops-io/context-runtime",
+      "revision": "0811760494ff00af470c898dbaffd135260c0c85",
+      "as_of": "2026-10-24",
+      "ref": "v4 (branch)"
+    }
   },
   "suite": "governed",
   "seeds": 12

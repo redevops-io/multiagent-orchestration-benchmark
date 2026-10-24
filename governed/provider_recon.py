@@ -335,6 +335,7 @@ def s7_provider_reconciliation(seed: int, tmp: Path) -> Result:
     identified = kind in ("lago_subscription", "apollo") or (kind == "gmail_message_id" and keeps_msgid)
     budget_ok = max(hidden, faults) + 1 <= 4
     if identified and executed and budget_ok:
+        out.legit(resolution == "executed", f"{tag} an identified, visible effect needed a person: state {state}, detail {job.get('last_detail')!r}")
         out.check(resolution == "executed", f"{tag} O4 an identified, visible effect was not settled (state {state}, resolution {resolution}, detail {job.get('last_detail')!r})")
     # O5 an unresolved job ends escalated, once
     if resolution != "executed":

@@ -1,5 +1,5 @@
 {
-  "controls_note": "What each governed scenario provides toward the plan's per-case requirements, stated from what its code checks. `false_denial_rate_measured` is false for every scenario: no scenario counts legitimate actions that were wrongly refused, so the lane reports no false-denial rate.",
+  "controls_note": "What each governed scenario provides toward the plan's per-case requirements, stated from what its code checks. `false_denial_rate_measured` is true only where the scenario counts actions that an oracle-side predicate (written without the system's policy code) says were legitimate and records how many the system refused; `legitimacy` says what that predicate is. A false denial is a rate to read, not a violation, and a mismatch can be the predicate's fault, which is why the first refusals are kept with their reasons in the results.",
   "coverage": {
     "by_family": {
       "authority": {
@@ -462,7 +462,8 @@
         "item": "cancellation propagation",
         "named_tests_found": [
           "tests/test_goal_loop.py::cancelling_during_a_run_stops_further_waves",
-          "tests/test_goal_loop.py::cancelling_a_waiting_loop_cancels_the_mission_and_lists_what_it_may_have_left"
+          "tests/test_goal_loop.py::cancelling_a_waiting_loop_cancels_the_mission_and_lists_what_it_may_have_left",
+          "tests/test_goal_loop_children.py::a_cancelled_loop_ends_its_children"
         ],
         "note": "",
         "status": "has_named_test"
@@ -478,7 +479,9 @@
         "item": "child credentials",
         "named_tests_found": [
           "tests/test_child_agents.py::a_credential_never_outlives_the_child",
-          "tests/test_child_agents.py::a_credential_that_does_not_fully_hold_is_refused"
+          "tests/test_child_agents.py::a_credential_that_does_not_fully_hold_is_refused",
+          "tests/test_goal_loop_children.py::a_child_stays_alive_for_as_long_as_the_loop_drives_its_mission_and_dies_without_the_wiring",
+          "tests/test_goal_loop_children.py::a_revoked_child_is_not_a_lost_child_and_is_never_revived"
         ],
         "note": "",
         "status": "has_governed_scenario"
@@ -575,7 +578,8 @@
         "named_tests_found": [
           "tests/test_egress_proxy.py::default_is_deny",
           "tests/test_egress_proxy.py::a_literal_ip_needs_an_exact_rule_and_the_metadata_address_is_never_reachable_by_accident",
-          "tests/test_sandbox_required.py::required_isolation_without_a_sandbox_fails_closed"
+          "tests/test_sandbox_required.py::required_isolation_without_a_sandbox_fails_closed",
+          "tests/test_membrane_platform.py::a_memory_ceiling_that_cannot_be_applied_is_refused_by_name_before_anything_runs"
         ],
         "note": "Python components only; no network-namespace or container-level test.",
         "status": "has_named_test"
@@ -620,7 +624,38 @@
     "note": "Counts per family; no score is computed across items or families. `has_named_test` means a test is named for the item in the pinned agentic-os, not that it is adequate.",
     "reference_problems": []
   },
-  "false_denial_rate": "not measured: no scenario counts legitimate actions that were wrongly refused",
+  "false_denials": {
+    "by_scenario": {
+      "agent_in_the_loop": {
+        "first_refusals": [],
+        "legitimate_actions": 12,
+        "rate": 0.0,
+        "refused": 0
+      },
+      "child_agent_tree": {
+        "first_refusals": [],
+        "legitimate_actions": 40,
+        "rate": 0.0,
+        "refused": 0
+      },
+      "compaction_fuzz": "not measured",
+      "fork_crash_restart": "not measured",
+      "goal_loop_chaos": "not measured",
+      "projects_routes": {
+        "first_refusals": [],
+        "legitimate_actions": 19,
+        "rate": 0.0,
+        "refused": 0
+      },
+      "provider_reconciliation": {
+        "first_refusals": [],
+        "legitimate_actions": 2,
+        "rate": 0.0,
+        "refused": 0
+      }
+    },
+    "note": "a refusal of an action the oracle's predicate calls legitimate; a rate to read, not a violation; per-scenario definitions are in controls.json"
+  },
   "lane": "runtime_adversarial",
   "manifest": {
     "budget": {
@@ -628,7 +663,7 @@
       "note": "no model or provider is called",
       "seeds": 12
     },
-    "end": "2026-10-24T18:58:24Z",
+    "end": "2026-10-24T19:43:31Z",
     "environment": {
       "platform": "macOS-27.0.1-arm64-arm-64bit",
       "profile": "production",
@@ -636,7 +671,7 @@
     },
     "evaluator_version": "1",
     "evidence_digests": {
-      "governed_properties.json": "816b278f9ea84a76373ab66a62241a01177138e06207fb1ceb19e5459fb9cc29"
+      "governed_properties.json": "7c409dc0dbf6c6babb5f53a78c8a554b06f7c76626d9f24f477ee59f541d37bb"
     },
     "model_ids": [
       "none: scripted, deterministic fake providers"
@@ -647,22 +682,22 @@
     },
     "pinned_revisions": {
       "agent-harness": "6b8ba3a596a5e2caf0fdf009f2af013517591662",
-      "agentic-os": "52a99ef163b4580608e8e0aba0d157afe2bf3c7c",
+      "agentic-os": "54d3dc2b22f2227b2374fd4e24d6dbf6a9e0f9ab",
       "context-runtime": "0811760494ff00af470c898dbaffd135260c0c85"
     },
     "pins_match": true,
     "provider": "simulated",
     "require_all": true,
     "result_uri": "file:runtime_adversarial.json",
-    "run_id": "governed-1792868304",
+    "run_id": "governed-1792871011",
     "runner_image_digest": "not recorded: runner image digest is not exposed to the job",
     "seed": "seeds 0..11",
     "source_revisions": {
       "agent-harness": "6b8ba3a596a5e2caf0fdf009f2af013517591662",
-      "agentic-os": "52a99ef163b4580608e8e0aba0d157afe2bf3c7c",
+      "agentic-os": "54d3dc2b22f2227b2374fd4e24d6dbf6a9e0f9ab",
       "context-runtime": "0811760494ff00af470c898dbaffd135260c0c85"
     },
-    "start": "2026-10-24T18:58:15Z",
+    "start": "2026-10-24T19:43:22Z",
     "status": "completed",
     "suite": "runtime-adversarial"
   },
@@ -673,14 +708,15 @@
     "container and network-policy tests",
     "image pinning and log-chain checks",
     "retrieval ACL tests (they belong to the context-runtime and RAG repositories)",
-    "a measured false-denial rate",
+    "false-denial counting outside the four scenarios that have it (see false_denials)",
     "traces and policy decisions in the results file"
   ],
   "scenario_controls": {
     "agent_in_the_loop": {
       "defect_seeded_revision_in_ci": true,
       "effects_counted_independently": true,
-      "false_denial_rate_measured": false,
+      "false_denial_rate_measured": true,
+      "legitimacy": "a refund within the child's per-action limit, with calls left in its grant, that is not a retry of an action whose outcome is still unknown (a refused retry after an unknown outcome is deliberate)",
       "negative_control_in_ci": true,
       "policy_decision_in_results": false,
       "positive_control": false,
@@ -689,7 +725,8 @@
     "child_agent_tree": {
       "defect_seeded_revision_in_ci": false,
       "effects_counted_independently": true,
-      "false_denial_rate_measured": false,
+      "false_denial_rate_measured": true,
+      "legitimacy": "an agent whose whole chain up to the root is active and unexpired, spending a capability covered by every level's current grants, within what it has left of its own allowance",
       "negative_control_in_ci": false,
       "policy_decision_in_results": false,
       "positive_control": false,
@@ -725,7 +762,8 @@
     "projects_routes": {
       "defect_seeded_revision_in_ci": false,
       "effects_counted_independently": true,
-      "false_denial_rate_measured": false,
+      "false_denial_rate_measured": true,
+      "legitimacy": "the operator credential on every write route (a 401 or 403 is the only refusal that counts), and the service identity on the one capability it was granted",
       "negative_control_in_ci": false,
       "policy_decision_in_results": false,
       "positive_control": true,
@@ -734,7 +772,8 @@
     "provider_reconciliation": {
       "defect_seeded_revision_in_ci": true,
       "effects_counted_independently": true,
-      "false_denial_rate_measured": false,
+      "false_denial_rate_measured": true,
+      "legitimacy": "an effect the provider identifies by its own record (a subscription, an enrollment, an email with a Message-ID it kept) that becomes visible within the retry budget: it should settle without a person (here a 'refusal' is a needless escalation)",
       "negative_control_in_ci": true,
       "policy_decision_in_results": false,
       "positive_control": true,
@@ -769,7 +808,7 @@
     "fork_crash_restart": {
       "checks": 3306,
       "error": null,
-      "seconds": 7.1,
+      "seconds": 6.8,
       "seeds": 12,
       "skipped": null,
       "violations": 0
@@ -777,7 +816,7 @@
     "goal_loop_chaos": {
       "checks": 331,
       "error": null,
-      "seconds": 0.7,
+      "seconds": 0.6,
       "seeds": 12,
       "skipped": null,
       "violations": 0

@@ -28,6 +28,16 @@ python3 governed/run_governed.py --only fork_crash_restart --seeds 12
 Writes `results/governed_properties.json` (per scenario: seeds, checks, violations, the first violations, the `agentic-os` revision) and exits 1 on any violation, 2 if a scenario
 could not run. A scenario that cannot run is reported as an error, never counted as a pass.
 
+## False denials
+
+Some scenarios also count the other kind of error: a **legitimate** action that the system refused. "Legitimate" is decided by a predicate in the scenario, written from the registry and the envelopes and not from the system's own policy code
+(a spend by an agent whose whole chain is active and unexpired, within its grants and its allowance; the operator credential on a write route; a refund within a child's grant that is not a retry of an unknown outcome; an effect the
+provider identifies that becomes visible within the retry budget). The results record, per scenario, `legitimate_actions`, `legitimate_refused`, `false_denial_rate` and the first refusals with their reasons. It is a rate to read, not a violation:
+the predicates can be wrong in either direction (the first full run of `child_agent_tree` reported one false denial; it was the predicate, which had left out an envelope's time allowance, and the system's refusal was right), a rate over a small number of actions says little, and a scenario that does not count shows `null`, not zero. Counted in `child_agent_tree`, `projects_routes`, `agent_in_the_loop` and
+`provider_reconciliation`.
+
+`GOVERNED_OVERDENY=1` makes the authority guard refuse everything. That is perfectly safe, so no safety check fails, and useless, so the false-denial rate goes to about 100%: the control that shows the counters can see over-denial.
+
 ## Does the suite detect anything?
 
 A suite that only ever passes proves little, so CI also runs two scenarios against `agentic-os` revisions that predate the behaviour and requires them to **fail**:

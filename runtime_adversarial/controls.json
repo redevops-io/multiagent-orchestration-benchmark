@@ -1,5 +1,5 @@
 {
-  "note": "What each governed scenario provides toward the plan's per-case requirements, stated from what its code checks. `false_denial_rate_measured` is false for every scenario: no scenario counts legitimate actions that were wrongly refused, so the lane reports no false-denial rate.",
+  "note": "What each governed scenario provides toward the plan's per-case requirements, stated from what its code checks. `false_denial_rate_measured` is true only where the scenario counts actions that an oracle-side predicate (written without the system's policy code) says were legitimate and records how many the system refused; `legitimacy` says what that predicate is. A false denial is a rate to read, not a violation, and a mismatch can be the predicate's fault, which is why the first refusals are kept with their reasons in the results.",
   "scenarios": {
     "fork_crash_restart": {
       "positive_control": true,
@@ -23,10 +23,11 @@
       "positive_control": false,
       "negative_control_in_ci": false,
       "defect_seeded_revision_in_ci": false,
-      "false_denial_rate_measured": false,
+      "false_denial_rate_measured": true,
       "trace_in_results": false,
       "policy_decision_in_results": false,
-      "effects_counted_independently": true
+      "effects_counted_independently": true,
+      "legitimacy": "an agent whose whole chain up to the root is active and unexpired, spending a capability covered by every level's current grants, within what it has left of its own allowance"
     },
     "compaction_fuzz": {
       "positive_control": true,
@@ -41,28 +42,31 @@
       "positive_control": true,
       "negative_control_in_ci": false,
       "defect_seeded_revision_in_ci": false,
-      "false_denial_rate_measured": false,
+      "false_denial_rate_measured": true,
       "trace_in_results": false,
       "policy_decision_in_results": false,
-      "effects_counted_independently": true
+      "effects_counted_independently": true,
+      "legitimacy": "the operator credential on every write route (a 401 or 403 is the only refusal that counts), and the service identity on the one capability it was granted"
     },
     "agent_in_the_loop": {
       "positive_control": false,
       "negative_control_in_ci": true,
       "defect_seeded_revision_in_ci": true,
-      "false_denial_rate_measured": false,
+      "false_denial_rate_measured": true,
       "trace_in_results": false,
       "policy_decision_in_results": false,
-      "effects_counted_independently": true
+      "effects_counted_independently": true,
+      "legitimacy": "a refund within the child's per-action limit, with calls left in its grant, that is not a retry of an action whose outcome is still unknown (a refused retry after an unknown outcome is deliberate)"
     },
     "provider_reconciliation": {
       "positive_control": true,
       "negative_control_in_ci": true,
       "defect_seeded_revision_in_ci": true,
-      "false_denial_rate_measured": false,
+      "false_denial_rate_measured": true,
       "trace_in_results": false,
       "policy_decision_in_results": false,
-      "effects_counted_independently": true
+      "effects_counted_independently": true,
+      "legitimacy": "an effect the provider identifies by its own record (a subscription, an enrollment, an email with a Message-ID it kept) that becomes visible within the retry budget: it should settle without a person (here a 'refusal' is a needless escalation)"
     }
   }
 }

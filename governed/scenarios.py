@@ -22,12 +22,23 @@ class Result:
     checks: int = 0
     violations: list = field(default_factory=list)
     meta: dict = field(default_factory=dict)
+    legit_total: int = 0
+    legit_refused: list = field(default_factory=list)
 
     def check(self, ok: bool, what: str) -> bool:
         self.checks += 1
         if not ok:
             self.violations.append(what)
         return ok
+
+    def legit(self, allowed: bool, what: str) -> bool:
+        """Record an action that an oracle-side predicate (written without the system's policy code) says was LEGITIMATE, and whether the system let it through. A refusal here is a false
+        denial: governance getting in the way of work it should have allowed. It is a rate to read, not a violation: the predicates are written by the benchmark's author and a mismatch
+        may be the predicate's fault, which is why the first refusals are kept with their reasons."""
+        self.legit_total += 1
+        if not allowed:
+            self.legit_refused.append(what)
+        return allowed
 
 
 # ═════════════════════════ S1: a fork survives a crash at every event boundary ═════════════════════════
@@ -268,6 +279,27 @@ def s3_child_agent_tree(seed: int, tmp: Path) -> Result:
         row = reg.get(k)
         return row is not None and row["status"] == "active"
 
+    def legit_spend(k, cap, usd) -> bool:
+        """Is this spend one an agent is entitled to make? Every agent from `k` up to the root is active, unexpired and inside its time allowance, the capability is covered by EACH level's current grants,
+        and the cost fits what `k` has left of its own allowance. Written from the registry and the envelopes, not from the guard's decision code."""
+        import fnmatch
+        chain, cur = [], k
+        while cur != "root":
+            row = reg.get(cur)
+            if row is None or row["status"] != "active":
+                return False
+            chain.append(cur)
+            cur = row["parent_key"]
+        chain.append("root")
+        for a in chain:
+            e = store.get(a)
+            if e is None or now() >= e.expires_at or not any(fnmatch.fnmatchcase(cap, g.capability) for g in e.grants):
+                return False
+            if now() - e.issued_at >= e.budget.wall_clock_s:                # an envelope's time allowance counts from its issue, at every level (found by the first full run: 1 "false denial" that was this)
+                return False
+        e, used = store.get(k), guard.ledger.used(k)
+        return used.get("usd", 0.0) + usd <= e.budget.usd + 1e-9 and used.get("actions", 0) + 1 <= e.budget.max_actions
+
     for step in range(ops):
         op = rng.choice(["spawn", "spawn", "spend", "spend", "close", "revoke", "narrow", "tick", "beat"])
         keys = [k for k in agents if k == "root" or alive(k)]
@@ -288,7 +320,11 @@ def s3_child_agent_tree(seed: int, tmp: Path) -> Result:
                           f"step {step}: a refused spawn changed the parent's counters")
         elif op == "spend" and keys:
             k = rng.choice(keys)
-            dec = guard.authorize(k, "acme", Action(rng.choice(["crm.read", "crm.write", "billing.read", "billing.delete"]), {}, 0, False, rng.choice([0.0, 0.5, 2.0])))
+            cap, usd = rng.choice(["crm.read", "crm.write", "billing.read", "billing.delete"]), rng.choice([0.0, 0.5, 2.0])
+            legit = legit_spend(k, cap, usd)                                      # decided BEFORE asking the guard, from the registry and the envelopes only
+            dec = guard.authorize(k, "acme", Action(cap, {}, 0, False, usd))
+            if legit:
+                out.legit(dec.allowed, f"step {step}: {k} spent {usd} on {cap}, legitimate by the oracle, refused: {getattr(dec, 'reason', '')}")
             if dec.allowed:
                 out.check(not any(a == "root" and "root" in revoked_roots for a in ancestors(k)), f"step {step}: an agent under a revoked root was allowed")
         elif op == "close" and len(keys) > 1:
@@ -419,6 +455,17 @@ def s5_projects_routes(seed: int, tmp: Path) -> Result:
         return r
     out = Result()
     saved = {k: os.environ.get(k) for k in ("AGENTIC_OS_PROFILE", "OPERATOR_BASIC_AUTH", "AGENTIC_OS_REPLAY_DB", "AGENTIC_OS_SERVICE_TOKENS", "AGENTIC_OS_APPROVAL_SECRET")}
+    # The Projects API builds its hosted-OAuth connector once from the environment. A machine that has OAuth client credentials exported would make it (correctly) demand the hosted connect flow, which
+    # is not what this scenario measures; clear them for the run, and restore them after.
+    oauth_vars: list = []
+    try:
+        from agentic_os.integrations.hosted_oauth import KNOWN_OAUTH
+        oauth_vars = [v for spec in KNOWN_OAUTH.values() for v in (spec["env_id"], spec["env_secret"])]
+    except Exception:  # noqa: BLE001 - the connector plugin may be absent: nothing to clear
+        pass
+    saved.update({k: os.environ.get(k) for k in oauth_vars})
+    for k in oauth_vars:
+        os.environ.pop(k, None)
     try:
         os.environ.update({"AGENTIC_OS_PROFILE": "production", "OPERATOR_BASIC_AUTH": f"ops:pw-{seed}-{'x' * 8}", "AGENTIC_OS_REPLAY_DB": str(tmp / f"replay{seed}.db"),
                            "AGENTIC_OS_SERVICE_TOKENS": json.dumps({"console": {"token": f"svc-{seed}", "capabilities": ["projects.capture"]}}),
@@ -426,7 +473,11 @@ def s5_projects_routes(seed: int, tmp: Path) -> Result:
 
         # the module builds an app at import, and in production that needs durable replay protection: set the environment first
         from agentic_os.app_kit.route_authz import write_routes
+        import agentic_os.projects_api as _pa
         from agentic_os.projects_api import SampleProjectionProvider, create_app
+        for attr, val in (("_HOSTED", None), ("_HOSTED_TRIED", False), ("_HOSTED_BROKEN", False)):
+            if hasattr(_pa, attr):
+                setattr(_pa, attr, val)                           # the connector is cached at module level: start from "not built"
 
         class Spy(SampleProjectionProvider):
             def __getattribute__(self, name):
@@ -461,6 +512,15 @@ def s5_projects_routes(seed: int, tmp: Path) -> Result:
         good = {"Authorization": "Basic " + base64.b64encode(os.environ["OPERATOR_BASIC_AUTH"].encode()).decode()}
         r = c.post("/api/projects/p1/capture", json={"text": "call the customer back"}, headers=good)
         out.check(r.status_code not in (401, 403), "the operator credential was refused")
+        # legitimate use: the operator on every write route, and the service identity on the one capability it was granted. A 401/403 is the only refusal that counts: a 404 or 422 for a
+        # made-up body is the handler's business, not the authorization layer's.
+        for route in routes:
+            method, path = route.split(" ", 1)
+            path = re.sub(r"\{(\w+)\}", lambda m: params[m.group(1)], path)
+            r = c.request(method, path, json={}, headers=good)
+            out.legit(r.status_code not in (401, 403), f"{route}: the operator credential was refused ({r.status_code})")
+        r = c.post("/api/projects/p1/capture", json={"text": "from the console"}, headers={"X-Service-Token": f"svc-{seed}"})
+        out.legit(r.status_code not in (401, 403), f"the service identity was refused the one capability it holds ({r.status_code})")
         out.meta = {"write_routes": len(routes), "human_decisions": len(human_only)}
     finally:
         for k, v in saved.items():
