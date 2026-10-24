@@ -245,8 +245,9 @@ def s10_rag_indexer_identity(seed: int, tmp: Path) -> Result:
         marks = {r.summary for r in ev.refs}
         out.check(all(mark(p, s) in m for m in marks), f"retrieval for {(p, s)!r} returned content that was indexed by another pair: {sorted(marks)[:2]}")
         out.legit(bool(marks), f"{(p, s)!r} retrieved nothing from its own index")
-    for k, path in resolved.items():
-        again = os.path.abspath(ix._path(*k)) if bug != "join" else path
-        out.check(again == os.path.abspath(path), f"the index file of {k!r} changed between calls")
+    for k, path in resolved.items():                        # stable: a second indexer over the same directory resolves the same pair to the same file
+        probe: list = []
+        RagIndexer(db_dir=str(db_dir), rag_factory=lambda pth: probe.append(pth) or _FakeIndex(pth))._store(*k) if bug != "join" else probe.append(path)
+        out.check(bool(probe) and os.path.abspath(probe[0]) == os.path.abspath(path), f"the index file of {k!r} changed between indexers")
     out.meta = {"pairs": len(pairs), "refused": refused, "bug": bug or None}
     return out

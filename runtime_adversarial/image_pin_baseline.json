@@ -1,0 +1,210 @@
+{
+ "note": "Mutable image references that are open findings in the pinned agentic-os. This list may only shrink; a new entry fails the lane. Regenerate deliberately with --write-baseline when bumping PINS.json.",
+ "revision": "313fa15f37eea8696d2a91b8063998d27469d0f9",
+ "open": [
+  {
+   "file": "Dockerfile",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "Dockerfile.projects",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/Dockerfile.module",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/admin-console/Dockerfile",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/admin-console/admin.compose.yml",
+   "ref": "${ADMIN_IMAGE:-admin-console:latest}"
+  },
+  {
+   "file": "deploy/apps/compose.metabase-theme.yml",
+   "ref": "nginx:alpine"
+  },
+  {
+   "file": "deploy/apps/compose.yml",
+   "ref": "${REGISTRY:-ghcr.io/redevops-io}/agentic-content-agent:${APPS_TAG:-stable}"
+  },
+  {
+   "file": "deploy/apps/compose.yml",
+   "ref": "${REGISTRY:-ghcr.io/redevops-io}/agentic-customer-success:${APPS_TAG:-stable}"
+  },
+  {
+   "file": "deploy/apps/compose.yml",
+   "ref": "${REGISTRY:-ghcr.io/redevops-io}/agentic-finance-agent:${APPS_TAG:-stable}"
+  },
+  {
+   "file": "deploy/apps/compose.yml",
+   "ref": "${REGISTRY:-ghcr.io/redevops-io}/agentic-intelligence-agent:${APPS_TAG:-stable}"
+  },
+  {
+   "file": "deploy/apps/compose.yml",
+   "ref": "${REGISTRY:-ghcr.io/redevops-io}/agentic-projects-console:${APPS_TAG:-stable}"
+  },
+  {
+   "file": "deploy/apps/compose.yml",
+   "ref": "${REGISTRY:-ghcr.io/redevops-io}/agentic-revenue-agent:${APPS_TAG:-stable}"
+  },
+  {
+   "file": "deploy/apps/compose.yml",
+   "ref": "${REGISTRY:-ghcr.io/redevops-io}/agentic-security-compliance:${APPS_TAG:-stable}"
+  },
+  {
+   "file": "deploy/attention-console/Dockerfile",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/attention-console/attention.compose.yml",
+   "ref": "${ATTENTION_IMAGE:-attention-console:latest}"
+  },
+  {
+   "file": "deploy/docker-compose.yml",
+   "ref": "traefik:v3.0"
+  },
+  {
+   "file": "deploy/egress/Dockerfile",
+   "ref": "python:3.13-slim"
+  },
+  {
+   "file": "deploy/evidence-explorer-demo/Dockerfile",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/evidence-explorer-demo/evidence-demo.compose.yml",
+   "ref": "${EVIDENCE_API_IMAGE:-evidence-demo:latest}"
+  },
+  {
+   "file": "deploy/k8s/networkpolicy-egress.yaml",
+   "ref": "ghcr.io/redevops-io/agentic-egress@sha256:REPLACE_WITH_THE_PUBLISHED_DIGEST"
+  },
+  {
+   "file": "deploy/nemo-voice-agent/nemo-llm.k8s.yaml",
+   "ref": "vllm/vllm-openai:latest"
+  },
+  {
+   "file": "deploy/permissions-showcase-demo/Dockerfile",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/permissions-showcase-demo/permissions-demo.compose.yml",
+   "ref": "${PERM_API_IMAGE:-permissions-demo:latest}"
+  },
+  {
+   "file": "deploy/projects-sidekick/compose.yml",
+   "ref": "ghcr.io/redevops-io/agentic-projects-sidekick:${IMAGE_TAG:-stable}"
+  },
+  {
+   "file": "deploy/refcore-billing/Dockerfile",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/refcore-billing/refcore.compose.yml",
+   "ref": "${REFCORE_IMAGE:-refcore-billing:latest}"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/profiles/amd-instinct.yaml",
+   "ref": "rocm/vllm@sha256:REPLACE_WITH_PINNED_DIGEST"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/profiles/nemo-retriever.yaml",
+   "ref": "nvcr.io/nim/nvidia/llama-3.2-nv-embedqa-1b-v2@sha256:REPLACE_WITH_PINNED_DIGEST"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/profiles/nemo-retriever.yaml",
+   "ref": "nvcr.io/nim/nvidia/llama-3.2-nv-rerankqa-1b-v2@sha256:REPLACE_WITH_PINNED_DIGEST"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/profiles/nvidia-nim.yaml",
+   "ref": "nvcr.io/nim/meta/llama-3.1-8b-instruct@sha256:REPLACE_WITH_PINNED_DIGEST"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/templates/cockpit.yaml",
+   "ref": "{{"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/templates/deploy-mission-verify.yaml",
+   "ref": "{{"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/templates/model-rocm.yaml",
+   "ref": "{{"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/templates/pgvector.yaml",
+   "ref": "{{"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/templates/runtime.yaml",
+   "ref": "{{"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/values.yaml",
+   "ref": "curlimages/curl:8.10.1"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/values.yaml",
+   "ref": "pgvector/pgvector:pg16"
+  },
+  {
+   "file": "deploy/reference-system/redevops-runtime/values.yaml",
+   "ref": "rocm/vllm:latest"
+  },
+  {
+   "file": "deploy/security-showcase-demo/Dockerfile",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/security-showcase-demo/security-demo.compose.yml",
+   "ref": "${SEC_API_IMAGE:-security-demo:latest}"
+  },
+  {
+   "file": "deploy/sidekick-devops/Dockerfile",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/sidekick-devops/docker-compose.yml",
+   "ref": "grafana/grafana:11.2.2"
+  },
+  {
+   "file": "deploy/sidekick-devops/docker-compose.yml",
+   "ref": "grafana/loki:3.2.0"
+  },
+  {
+   "file": "deploy/sidekick-devops/docker-compose.yml",
+   "ref": "grafana/promtail:3.2.0"
+  },
+  {
+   "file": "deploy/sidekick-devops/docker-compose.yml",
+   "ref": "prom/prometheus:v2.54.1"
+  },
+  {
+   "file": "deploy/sidekick-devops/docker-compose.yml",
+   "ref": "sidekick-devops:latest"
+  },
+  {
+   "file": "deploy/sidekick-devops/helm/templates/deployment.yaml",
+   "ref": "{{"
+  },
+  {
+   "file": "deploy/unsubscribe-service/Dockerfile",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/unsubscribe-service/unsubscribe.compose.yml",
+   "ref": "${UNSUB_IMAGE:-unsubscribe-service:latest}"
+  },
+  {
+   "file": "deploy/world-canvas-demo/Dockerfile",
+   "ref": "python:3.12-slim"
+  },
+  {
+   "file": "deploy/world-canvas-demo/world-canvas.compose.yml",
+   "ref": "${WORLD_CANVAS_IMAGE:-world-canvas-demo:latest}"
+  }
+ ]
+}

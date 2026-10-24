@@ -67,6 +67,57 @@
       "policy_decision_in_results": false,
       "effects_counted_independently": true,
       "legitimacy": "an effect the provider identifies by its own record (a subscription, an enrollment, an email with a Message-ID it kept) that becomes visible within the retry budget: it should settle without a person (here a 'refusal' is a needless escalation)"
+    },
+    "cross_model_delegation": {
+      "positive_control": true,
+      "negative_control_in_ci": true,
+      "defect_seeded_revision_in_ci": true,
+      "false_denial_rate_measured": true,
+      "legitimacy": "an agent and every ancestor active and unexpired, each level's grants covering the capability, within the agent's own call limits and action allowance; provider effects are counted at the provider",
+      "trace_in_results": false,
+      "policy_decision_in_results": false,
+      "effects_counted_independently": true
+    },
+    "retrieval_isolation": {
+      "positive_control": true,
+      "negative_control_in_ci": true,
+      "defect_seeded_revision_in_ci": true,
+      "false_denial_rate_measured": true,
+      "legitimacy": "a permitted document found by its own secret through the scoped query",
+      "trace_in_results": false,
+      "policy_decision_in_results": false,
+      "effects_counted_independently": true
+    },
+    "rag_indexer_identity": {
+      "positive_control": true,
+      "negative_control_in_ci": true,
+      "defect_seeded_revision_in_ci": true,
+      "false_denial_rate_measured": true,
+      "legitimacy": "a pair retrieving the content it indexed itself",
+      "trace_in_results": false,
+      "policy_decision_in_results": false,
+      "effects_counted_independently": true
+    }
+  },
+  "infra_checks": {
+    "note": "Checks that run outside the simulated missions (runtime_adversarial/infra.py). Each has a positive control and a defect-seeded variant CI expects to fail.",
+    "network_isolation": {
+      "positive_control": "a client on the outside network reaches the origin directly",
+      "defect_seeded_variant": "RA_NETWORK_BUG=open_network (the 'internal' network is created without --internal)",
+      "oracle": "the origin's own request log",
+      "needs": "a Docker daemon and the ability to build the repository's egress image; otherwise not_tested"
+    },
+    "image_pinning": {
+      "positive_control": "seeded fixture references of every kind (tag, latest, variable, short/long/upper-case/non-hex digest, valid digest) classify as the table says",
+      "defect_seeded_variant": "RA_PINNING_BUG=accept_all",
+      "oracle": "the fixture table, written separately from the scanner; the repository's mutable references may only shrink (image_pin_baseline.json)",
+      "needs": "a git checkout"
+    },
+    "log_chain": {
+      "positive_control": "an untouched log verifies with every event covered",
+      "defect_seeded_variant": "RA_LOG_BUG=no_verify",
+      "oracle": "each tamper is applied to the log file by the check, which knows what it changed",
+      "needs": "the pinned agentic-os"
     }
   }
 }

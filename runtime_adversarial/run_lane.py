@@ -57,7 +57,7 @@ def named_test_exists(checkout: "str | None", ref: dict) -> bool:
     return any(ref["name"] in m for m in re.findall(r"^\s*def (test_\w+)", text, re.M))
 
 
-def evaluate_coverage(coverage: dict, scenario_results: dict, registered: set, agentic_os: "str | None") -> dict:
+def evaluate_coverage(coverage: dict, scenario_results: dict, registered: set, agentic_os: "str | None", infra: "dict | None" = None) -> dict:
     """Per item: has_governed_scenario / failing / has_named_test / not_tested, with the reason. References that do not resolve are reported and never count."""
     out, problems = [], []
     for it in coverage["items"]:
@@ -73,21 +73,32 @@ def evaluate_coverage(coverage: dict, scenario_results: dict, registered: set, a
                 gov_bad.append(name)
             else:
                 gov_ok.append(name)
+        inf_ok, inf_bad, inf_untested = [], [], []
+        for name in it.get("infra", []):
+            res = (infra or {}).get(name)
+            if res is None or res.get("status") in ("not_tested", "error"):
+                inf_untested.append(name)
+            elif res.get("status") == "fail":
+                inf_bad.append(name)
+            else:
+                inf_ok.append(name)
         tests_ok = [t for t in it["source_tests"] if named_test_exists(agentic_os, t)]
         tests_missing = [t for t in it["source_tests"] if not named_test_exists(agentic_os, t)]
         if tests_missing:
             problems.append(f"{it['id']}: named test(s) not found in the checkout: " + "; ".join(f"{t['file']}::{t['name']}" for t in tests_missing))
-        if gov_bad:
+        if gov_bad or inf_bad:
             status = "failing"
         elif gov_ok:
             status = "has_governed_scenario"
+        elif inf_ok and not inf_untested:
+            status = "has_infra_check"
         elif tests_ok:
             status = "has_named_test"
         else:
             status = "not_tested"
-        out.append({"id": it["id"], "family": it["family"], "item": it["item"], "status": status, "governed_passed": gov_ok, "governed_failing": gov_bad, "governed_not_run": gov_untested,
+        out.append({"id": it["id"], "family": it["family"], "item": it["item"], "status": status, "governed_passed": gov_ok, "governed_failing": gov_bad, "governed_not_run": gov_untested, "infra_passed": inf_ok, "infra_failing": inf_bad, "infra_not_run": inf_untested,
                     "named_tests_found": [f"{t['file']}::{t['name']}" for t in tests_ok], "note": it.get("note", "")})
-    fam = {f: {"items": 0, "has_governed_scenario": 0, "has_named_test": 0, "not_tested": 0, "failing": 0} for f in FAMILIES}
+    fam = {f: {"items": 0, "has_governed_scenario": 0, "has_infra_check": 0, "has_named_test": 0, "not_tested": 0, "failing": 0} for f in FAMILIES}
     for o in out:
         fam[o["family"]]["items"] += 1
         fam[o["family"]][o["status"]] += 1
@@ -140,17 +151,20 @@ def main() -> int:
     ap.add_argument("--agentic-os", required=True)
     ap.add_argument("--agent-harness")
     ap.add_argument("--context-runtime")
+    ap.add_argument("--redevops-rag", help="the redevops-rag checkout the scenarios import (pip install it first); its revision is checked and recorded")
     ap.add_argument("--seeds", type=int, default=None)
     ap.add_argument("--out", default=str(ROOT / "results" / "runtime_adversarial.json"))
     ap.add_argument("--allow-unpinned", action="store_true", help="run against checkouts that are not the pinned revisions (the report says so)")
     ap.add_argument("--require-all", action="store_true", help="a skipped scenario fails the run (CI uses this)")
+    ap.add_argument("--no-infra", action="store_true", help="do not run the infrastructure checks (docker, image scan, log chain): their items are then not_tested")
+    ap.add_argument("--infra-results", help="use an existing infra results file instead of running the checks (tests)")
     ap.add_argument("--governed-results", help="use an existing governed_properties.json instead of running the suite (tests)")
     a = ap.parse_args()
     pins = json.loads((HERE / "PINS.json").read_text())
     a.seeds = a.seeds or pins["seeds"]
-    heads = {"agentic-os": git_head(a.agentic_os), "agent-harness": git_head(a.agent_harness), "context-runtime": git_head(a.context_runtime)}
+    heads = {"agentic-os": git_head(a.agentic_os), "agent-harness": git_head(a.agent_harness), "context-runtime": git_head(a.context_runtime), "redevops-rag": git_head(a.redevops_rag)}
     mismatched = {k: {"pinned": pins["sources"][k]["revision"], "found": v or "unknown"} for k, v in heads.items() if v != pins["sources"][k]["revision"]
-                  and (k == "agentic-os" or (k == "agent-harness" and a.agent_harness) or (k == "context-runtime" and a.context_runtime))}
+                  and (k == "agentic-os" or (k == "agent-harness" and a.agent_harness) or (k == "context-runtime" and a.context_runtime) or (k == "redevops-rag" and a.redevops_rag))}
     if mismatched and not a.allow_unpinned:
         print("not the pinned revision:", json.dumps(mismatched, indent=2))
         return 3
@@ -168,8 +182,20 @@ def main() -> int:
     registered = set(S.SCENARIOS)
     scen = results.get("scenarios", {})
     controls = json.loads((HERE / "controls.json").read_text())
-    cov = evaluate_coverage(json.loads((HERE / "coverage.json").read_text()), scen, registered, a.agentic_os)
+    if a.infra_results:
+        infra = json.loads(Path(a.infra_results).read_text())
+    elif a.no_infra:
+        infra = {}
+    else:
+        import infra as _infra                    # noqa: PLC0415 - sibling module; needs only the standard library
+        infra = _infra.run(a.agentic_os)
+    cov = evaluate_coverage(json.loads((HERE / "coverage.json").read_text()), scen, registered, a.agentic_os, infra)
     manifest = build_manifest(pins, heads, a.seeds, rc, start, end, digest, f"file:{Path(a.out).name}", results, a.require_all)
+    infra_untested = sorted(n for n, r in infra.items() if r.get("status") in ("not_tested", "error")) if infra else sorted(["network_isolation", "image_pinning", "log_chain"])
+    manifest["not_tested"]["infra_checks"] = infra_untested
+    manifest["evidence_digests"]["infra.json"] = hashlib.sha256(json.dumps(infra, sort_keys=True).encode()).hexdigest()
+    if infra_untested and manifest["status"] == "completed":
+        manifest["status"] = "partial"
     manifest["pins_match"] = not mismatched
     if mismatched:
         manifest["unpinned"] = mismatched
@@ -177,8 +203,8 @@ def main() -> int:
               "scenarios": {n: {k: scen[n].get(k) for k in ("seeds", "checks", "violations", "skipped", "error", "seconds")} for n in sorted(scen)},
               "false_denials": {"by_scenario": false_denials(scen), "note": "a refusal of an action the oracle's predicate calls legitimate; a rate to read, not a violation; per-scenario definitions are in controls.json"},
               "scenario_controls": {n: controls["scenarios"].get(n, "not declared") for n in sorted(scen)}, "controls_note": controls["note"],
-              "coverage": cov,
-              "not_built": ["multi-model and multi-replica scheduled tests", "container and network-policy tests", "image pinning and log-chain checks", "retrieval ACL tests (they belong to the context-runtime and RAG repositories)",
+              "infra": infra, "coverage": cov,
+              "not_built": ["multi-model and multi-replica scheduled tests", "Kubernetes NetworkPolicy enforcement in a live cluster", "whether a pinned image digest exists in its registry", "the enterprise store and enterprise extensions (a separate track; the private repositories are not available to public CI)", "per-document ACLs inside one tenant's store (redevops-rag has none; the caller scopes by document id)", "a real model deciding to delegate: S8 scripts the agents",
                             "false-denial counting outside the four scenarios that have it (see false_denials)", "traces and policy decisions in the results file"],
               "no_aggregate": "no score is combined across scenarios, families or lanes"}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
@@ -186,14 +212,17 @@ def main() -> int:
     viol = sum(r.get("violations", 0) for r in scen.values())
     skipped = [n for n, r in scen.items() if r.get("skipped")]
     errored = [n for n, r in scen.items() if r.get("error")]
+    infra_failed = sorted(n for n, r in infra.items() if r.get("status") == "fail")
+    infra_errored = sorted(n for n, r in infra.items() if r.get("status") == "error")
     print(f"runtime-adversarial: {len(scen)} scenarios, {viol} violation(s), skipped {skipped or 'none'}, errored {errored or 'none'}; manifest status {manifest['status']}")
+    print(f"  infra checks: " + (", ".join(f"{n}={r.get('status')}" for n, r in sorted(infra.items())) or "not run"))
     for fam, c in cov["by_family"].items():
-        print(f"  {fam:15} items={c['items']:<3} governed={c['has_governed_scenario']:<3} named_test_only={c['has_named_test']:<3} not_tested={c['not_tested']:<3} failing={c['failing']}")
+        print(f"  {fam:15} items={c['items']:<3} governed={c['has_governed_scenario']:<3} infra={c['has_infra_check']:<3} named_test_only={c['has_named_test']:<3} not_tested={c['not_tested']:<3} failing={c['failing']}")
     for p in cov["reference_problems"]:
         print("  reference problem:", p)
-    if errored or (a.require_all and skipped) or cov["reference_problems"] and a.require_all:
+    if errored or infra_errored or (a.require_all and (skipped or infra_untested)) or cov["reference_problems"] and a.require_all:
         return 2
-    return 1 if viol or rc == 1 else (2 if rc else 0)
+    return 1 if viol or rc == 1 or infra_failed else (2 if rc else 0)
 
 
 if __name__ == "__main__":
