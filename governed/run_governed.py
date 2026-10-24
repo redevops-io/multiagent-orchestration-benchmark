@@ -23,6 +23,8 @@ sys.path.insert(0, str(ROOT))
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--agentic-os", default=None)
+    ap.add_argument("--agent-harness", default=None, help="path to an agent-harness checkout (or $AGENT_HARNESS_PATH, or installed)")
+    ap.add_argument("--context-runtime", default=None, help="path to a context-runtime checkout (or $CONTEXT_RUNTIME_PATH, or installed)")
     ap.add_argument("--seeds", type=int, default=None, help="override the number of seeds of every randomized scenario")
     ap.add_argument("--only", nargs="*", default=None)
     ap.add_argument("--out", default=str(ROOT / "results" / "governed_properties.json"))
@@ -31,8 +33,9 @@ def main() -> int:
     os.environ.pop("AGENTIC_OS_APPROVAL_SECRET", None)
     from governed import kit
     rev = kit.import_agentic_os(a.agentic_os)
+    stack = kit.import_agent_stack(a.agent_harness, a.context_runtime)
     from governed import scenarios
-    report = {"agentic_os": rev, "python": sys.version.split()[0], "profile": "production", "scenarios": {}}
+    report = {"agentic_os": rev, "agent_harness": stack["agent_harness"], "context_runtime": stack["context_runtime"], "python": sys.version.split()[0], "profile": "production", "scenarios": {}}
     rc = 0
     for name, (fn, default_seeds) in scenarios.SCENARIOS.items():
         if a.only and name not in a.only:

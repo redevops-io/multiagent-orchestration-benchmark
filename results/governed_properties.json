@@ -1,32 +1,51 @@
 {
-  "agentic_os": "853cb4d77998",
+  "agent_harness": "6b8ba3a596a5",
+  "agentic_os": "c5ecac7e5016",
+  "context_runtime": "1ab9635152f1",
   "profile": "production",
   "python": "3.12.15",
   "scenarios": {
+    "agent_in_the_loop": {
+      "checks": 4297,
+      "first_violations": [],
+      "sample_meta": {
+        "deterministic_keys": true,
+        "effects": 1,
+        "placeholder_blocked": 1,
+        "sentinel_events": 2,
+        "stop": "done",
+        "stubs_in_context": 3,
+        "timeouts": false,
+        "turns": 12
+      },
+      "seconds": 5.5,
+      "seeds": 300,
+      "violations": 0
+    },
     "child_agent_tree": {
-      "checks": 102134,
+      "checks": 77707,
       "first_violations": [],
       "sample_meta": {
         "active_at_end": 0,
         "agents": 5,
         "operations": 37
       },
-      "seconds": 35.5,
-      "seeds": 400,
+      "seconds": 27.3,
+      "seeds": 300,
       "violations": 0
     },
     "compaction_fuzz": {
-      "checks": 52635,
+      "checks": 39412,
       "first_violations": [],
       "sample_meta": {
         "histories": 30
       },
-      "seconds": 0.5,
-      "seeds": 400,
+      "seconds": 0.4,
+      "seeds": 300,
       "violations": 0
     },
     "fork_crash_restart": {
-      "checks": 109858,
+      "checks": 82156,
       "first_violations": [],
       "sample_meta": {
         "applied_on_timeout": false,
@@ -35,12 +54,12 @@
         "parallel_branches": false,
         "uncrashed_points": 2
       },
-      "seconds": 286.2,
-      "seeds": 400,
+      "seconds": 210.0,
+      "seeds": 300,
       "violations": 0
     },
     "goal_loop_chaos": {
-      "checks": 11656,
+      "checks": 8650,
       "first_violations": [],
       "sample_meta": {
         "final": "limit",
@@ -60,8 +79,8 @@
         },
         "resends_after_negative": 0
       },
-      "seconds": 29.2,
-      "seeds": 400,
+      "seconds": 21.9,
+      "seeds": 300,
       "violations": 0
     },
     "projects_routes": {
