@@ -1,0 +1,68 @@
+{
+  "note": "What each governed scenario provides toward the plan's per-case requirements, stated from what its code checks. `false_denial_rate_measured` is false for every scenario: no scenario counts legitimate actions that were wrongly refused, so the lane reports no false-denial rate.",
+  "scenarios": {
+    "fork_crash_restart": {
+      "positive_control": true,
+      "negative_control_in_ci": true,
+      "defect_seeded_revision_in_ci": true,
+      "false_denial_rate_measured": false,
+      "trace_in_results": false,
+      "policy_decision_in_results": false,
+      "effects_counted_independently": true
+    },
+    "goal_loop_chaos": {
+      "positive_control": false,
+      "negative_control_in_ci": false,
+      "defect_seeded_revision_in_ci": false,
+      "false_denial_rate_measured": false,
+      "trace_in_results": false,
+      "policy_decision_in_results": false,
+      "effects_counted_independently": true
+    },
+    "child_agent_tree": {
+      "positive_control": false,
+      "negative_control_in_ci": false,
+      "defect_seeded_revision_in_ci": false,
+      "false_denial_rate_measured": false,
+      "trace_in_results": false,
+      "policy_decision_in_results": false,
+      "effects_counted_independently": true
+    },
+    "compaction_fuzz": {
+      "positive_control": true,
+      "negative_control_in_ci": false,
+      "defect_seeded_revision_in_ci": false,
+      "false_denial_rate_measured": false,
+      "trace_in_results": false,
+      "policy_decision_in_results": false,
+      "effects_counted_independently": false
+    },
+    "projects_routes": {
+      "positive_control": true,
+      "negative_control_in_ci": false,
+      "defect_seeded_revision_in_ci": false,
+      "false_denial_rate_measured": false,
+      "trace_in_results": false,
+      "policy_decision_in_results": false,
+      "effects_counted_independently": true
+    },
+    "agent_in_the_loop": {
+      "positive_control": false,
+      "negative_control_in_ci": true,
+      "defect_seeded_revision_in_ci": true,
+      "false_denial_rate_measured": false,
+      "trace_in_results": false,
+      "policy_decision_in_results": false,
+      "effects_counted_independently": true
+    },
+    "provider_reconciliation": {
+      "positive_control": true,
+      "negative_control_in_ci": true,
+      "defect_seeded_revision_in_ci": true,
+      "false_denial_rate_measured": false,
+      "trace_in_results": false,
+      "policy_decision_in_results": false,
+      "effects_counted_independently": true
+    }
+  }
+}

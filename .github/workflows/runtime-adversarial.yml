@@ -1,0 +1,69 @@
+name: runtime-adversarial
+# The runtime-adversarial lane: the governed-properties suite against PINNED revisions of agentic-os, agent-harness and context-runtime (runtime_adversarial/PINS.json), with a run manifest and the coverage
+# map. Offline: simulated providers and scripted models, no API keys, no model calls. governed.yml runs the same suite against the default branches to catch drift; this one names exactly what it ran against.
+on:
+  pull_request:
+    paths: ["governed/**", "runtime_adversarial/**", ".github/workflows/runtime-adversarial.yml"]
+  push:
+    branches: ["master"]
+    paths: ["governed/**", "runtime_adversarial/**"]
+  schedule:
+    - cron: "37 4 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contracts:
+    # Fast contract tests of the lane itself (coverage statuses, manifest, exit codes). No runtime checkout, no keys.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pytest
+      - run: python -m pytest runtime_adversarial/test_runtime_adversarial.py -q
+  lane:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read the pins
+        id: pins
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          p = json.load(open("runtime_adversarial/PINS.json"))["sources"]
+          for k, v in p.items():
+              print(f"{k.replace('-', '_')}={v['revision']}")
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: redevops-io/agentic-os
+          ref: ${{ steps.pins.outputs.agentic_os }}
+          path: agentic-os
+      - uses: actions/checkout@v4
+        with:
+          repository: redevops-io/agent-harness
+          ref: ${{ steps.pins.outputs.agent_harness }}
+          path: agent-harness
+      - uses: actions/checkout@v4
+        with:
+          repository: redevops-io/context-runtime
+          ref: ${{ steps.pins.outputs.context_runtime }}
+          path: context-runtime
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install agentic-os and its dependencies
+        run: pip install ./agentic-os
+      - name: Run the lane (a skipped scenario fails it)
+        env:
+          RUNNER_IMAGE_DIGEST: ${{ runner.os }}-${{ runner.arch }}-${{ env.ImageVersion }}
+        run: python runtime_adversarial/run_lane.py --agentic-os agentic-os --agent-harness agent-harness --context-runtime context-runtime --require-all --out "$RUNNER_TEMP/runtime_adversarial.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime_adversarial
+          path: ${{ runner.temp }}/runtime_adversarial.json
