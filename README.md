@@ -35,6 +35,9 @@ A full paired trial (`python3 harness/bench.py <shape> <seed>`) needs API keys f
 **SOC 2 assessment accuracy (separate lane).** [soc2_accuracy/](soc2_accuracy/) measures how often Edge Sentinel's readiness assessment concludes more than its evidence supports, on synthetic fixtures with a
 labelled truth. It is scored on its own, reports no aggregate score, and makes no claim about anyone's compliance.
 
+**CyberGym-E2E (separate lane, scaffolding only).** [cybergym_e2e/](cybergym_e2e/) prepares and scores runs of the official [CyberGym-E2E](https://github.com/sunblaze-ucb/cybergym-e2e) benchmark in an isolated environment (pinned revisions, a seeded pilot, a
+report that keeps stages S1-S4 separate, a leakage audit, a run manifest). **No CyberGym-E2E run has been made and no result is claimed**; synthetic fixtures are never labelled as CyberGym results.
+
 **Evidence.** [results/final_report.json](results/final_report.json), [results/full_matrix.json](results/full_matrix.json), [writeup/does-formal-orchestration-help.md](writeup/does-formal-orchestration-help.md).
 
 **Limitations.** See the Scope-of-the-claim paragraph and the write-up's "What would change the verdict" section.

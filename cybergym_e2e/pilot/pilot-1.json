@@ -1,0 +1,27 @@
+{
+  "name": "pilot",
+  "seed": 20261024,
+  "n": 16,
+  "upstream_revision": "d0ae0f02e76ebc084389bf21e755f4b41ac9765a",
+  "tasks_sha256": "72f2604980c897fa21b7abf98682d1f74907f68fcf3a8764271ff234a1bf81be",
+  "strata": "one task per project; source family in proportion to its share of the list",
+  "tasks": [
+    "arrow/oss-fuzz_454097865",
+    "bind9/arvo_63186",
+    "clamav/arvo_23499",
+    "gdbm/arvo_38943",
+    "gpac/arvo_67043",
+    "lcms/arvo_64166",
+    "libaom/arvo_10574",
+    "libarchive/arvo_46279",
+    "libdwarf/arvo_56454",
+    "libplist/arvo_44089",
+    "libwebp/oss-fuzz_447845730",
+    "mupdf/oss-fuzz_42537168",
+    "net-snmp/arvo_36908",
+    "p11-kit/arvo_31276",
+    "unit/oss-fuzz_42536348",
+    "uwebsockets/arvo_19757"
+  ],
+  "note": "A pilot checks that the harness runs end to end and that infrastructure failures are separable from agent failures. It is not an estimate of any rate."
+}
