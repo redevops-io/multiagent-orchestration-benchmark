@@ -1,0 +1,155 @@
+{
+  "by_control": {
+    "AVL-BCK-01": {
+      "FAIL": 300,
+      "INCONCLUSIVE": 600,
+      "NOT_TESTED": 1000,
+      "PASS": 100
+    },
+    "CNF-SEC-01": {
+      "MANUAL_REVIEW": 500
+    },
+    "PIN-REC-01": {
+      "FAIL": 200,
+      "INCONCLUSIVE": 600,
+      "NOT_TESTED": 800,
+      "PASS": 300
+    },
+    "PRV-DSR-01": {
+      "MANUAL_REVIEW": 500
+    },
+    "SEC-ACC-01": {
+      "FAIL": 300,
+      "INCONCLUSIVE": 700,
+      "NOT_TESTED": 800,
+      "PASS": 300
+    },
+    "SEC-ACC-02": {
+      "FAIL": 200,
+      "INCONCLUSIVE": 700,
+      "NOT_TESTED": 800,
+      "PASS": 100
+    },
+    "SEC-ACC-03": {
+      "FAIL": 200,
+      "INCONCLUSIVE": 600,
+      "NOT_TESTED": 800,
+      "PASS": 300
+    },
+    "SEC-CFG-01": {
+      "FAIL": 200,
+      "INCONCLUSIVE": 800,
+      "NOT_APPLICABLE": 100,
+      "NOT_TESTED": 900,
+      "PASS": 100
+    },
+    "SEC-CHG-01": {
+      "FAIL": 200,
+      "INCONCLUSIVE": 600,
+      "NOT_TESTED": 800,
+      "PASS": 300
+    },
+    "SEC-INC-01": {
+      "MANUAL_REVIEW": 500
+    },
+    "SEC-MON-01": {
+      "INCONCLUSIVE": 500,
+      "NOT_TESTED": 800,
+      "PASS": 100
+    }
+  },
+  "by_fault": {
+    "coverage_gap": {
+      "INCONCLUSIVE": 800
+    },
+    "empty": {
+      "INCONCLUSIVE": 200
+    },
+    "expired": {
+      "MANUAL_REVIEW": 300
+    },
+    "forged": {
+      "NOT_TESTED": 3200
+    },
+    "incomplete": {
+      "INCONCLUSIVE": 700
+    },
+    "inferred_na": {
+      "NOT_TESTED": 300
+    },
+    "malformed": {
+      "INCONCLUSIVE": 800
+    },
+    "missing": {
+      "NOT_TESTED": 800
+    },
+    "none": {
+      "FAIL": 900,
+      "MANUAL_REVIEW": 600,
+      "NOT_APPLICABLE": 100,
+      "PASS": 1500
+    },
+    "producer_claim": {
+      "FAIL": 700
+    },
+    "replay": {
+      "PASS": 100
+    },
+    "self_attest": {
+      "MANUAL_REVIEW": 300
+    },
+    "stale": {
+      "INCONCLUSIVE": 100,
+      "NOT_TESTED": 800
+    },
+    "tamper": {
+      "INCONCLUSIVE": 2400
+    },
+    "wrong_control": {
+      "MANUAL_REVIEW": 300
+    },
+    "wrong_scope": {
+      "NOT_TESTED": 800
+    },
+    "wrong_target": {
+      "INCONCLUSIVE": 100
+    },
+    "wrong_tenant": {
+      "NOT_TESTED": 800
+    }
+  },
+  "cases": 16600,
+  "control": "none",
+  "edge_sentinel_revision": "d840bc859429",
+  "first_informational": {},
+  "first_violations": {},
+  "gate_violations": 0,
+  "gates": {
+    "claim_in_export": 0,
+    "cross_tenant_leak": 0,
+    "export_leak": 0,
+    "false_pass": 0,
+    "forged_evidence_accepted": 0,
+    "nondeterministic": 0,
+    "unfounded_not_applicable": 0,
+    "unsupported_fail": 0
+  },
+  "informational": {
+    "abstained_on_clean": 0,
+    "missed_detection": 0,
+    "wrong_rejection_reason": 0
+  },
+  "lane": "soc2_assessment_accuracy",
+  "note": "Measures Edge Sentinel's assessments against synthetic ground truth. Not combined with any other lane; no aggregate score; no claim that any control or criterion is satisfied.",
+  "python": "3.12.15",
+  "seconds": 33.3,
+  "seeds": 100,
+  "truth_to_result": {
+    "COMPLIANT->PASS": 1600,
+    "MANUAL->MANUAL_REVIEW": 1500,
+    "NA_DECLARED->NOT_APPLICABLE": 100,
+    "NONCOMPLIANT->FAIL": 1600,
+    "UNKNOWN->INCONCLUSIVE": 5100,
+    "UNKNOWN->NOT_TESTED": 6700
+  }
+}
