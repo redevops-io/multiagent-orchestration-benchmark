@@ -43,16 +43,17 @@ def s1_fork_crash_restart(seed: int, tmp: Path) -> Result:
     rng = random.Random(seed)
     applied = rng.random() < 0.5                     # did the unknown call actually take effect at the provider?
     max_b = rng.choice([1, 2])
-    out = Result(meta={"applied_on_timeout": applied, "b_attempts": max_b})
+    conc = seed % 2 == 1                              # odd seeds run the branches in parallel, even seeds one at a time
+    out = Result(meta={"applied_on_timeout": applied, "b_attempts": max_b, "parallel_branches": conc})
     GRANTS = ["w:write"]
 
     def spec():
         return ForkSpec("f1", [BranchSpec("A", "w.write", inputs={"tag": "a"}), BranchSpec("B", "w.write", inputs={"tag": "b"}, max_attempts=max_b),
-                               BranchSpec("C", "w.read", inputs={"tag": "c"})], JoinSpec("all", None, None, "fail", True), max_concurrent=1)
+                               BranchSpec("C", "w.read", inputs={"tag": "c"})], JoinSpec("all", None, None, "fail", True), max_concurrent=3 if conc else 1)
 
     def boot(world, crashing=None):
         store = crashing or fork_join_store(world["log"])
-        rt = MissionRuntime(kit.registry(), Executor(world["op"]), store=store, max_concurrency=1, planner=kit.StepsPlanner(),
+        rt = MissionRuntime(kit.registry(), Executor(world["op"]), store=store, max_concurrency=4 if conc else 1, planner=kit.StepsPlanner(),
                             authority=world["guard"](), authority_key=lambda m: "env")
         rt.forks.poll_s = 0.002
         return rt

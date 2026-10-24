@@ -4,42 +4,43 @@
   "python": "3.12.15",
   "scenarios": {
     "child_agent_tree": {
-      "checks": 10049,
+      "checks": 102134,
       "first_violations": [],
       "sample_meta": {
         "active_at_end": 0,
         "agents": 5,
         "operations": 37
       },
-      "seconds": 3.3,
-      "seeds": 40,
+      "seconds": 35.5,
+      "seeds": 400,
       "violations": 0
     },
     "compaction_fuzz": {
-      "checks": 5239,
+      "checks": 52635,
       "first_violations": [],
       "sample_meta": {
         "histories": 30
       },
-      "seconds": 0.1,
-      "seeds": 40,
+      "seconds": 0.5,
+      "seeds": 400,
       "violations": 0
     },
     "fork_crash_restart": {
-      "checks": 836,
+      "checks": 109858,
       "first_violations": [],
       "sample_meta": {
         "applied_on_timeout": false,
         "b_attempts": 2,
         "crash_points": 19,
+        "parallel_branches": false,
         "uncrashed_points": 2
       },
-      "seconds": 2.0,
-      "seeds": 3,
+      "seconds": 286.2,
+      "seeds": 400,
       "violations": 0
     },
     "goal_loop_chaos": {
-      "checks": 1013,
+      "checks": 11656,
       "first_violations": [],
       "sample_meta": {
         "final": "limit",
@@ -59,8 +60,8 @@
         },
         "resends_after_negative": 0
       },
-      "seconds": 2.5,
-      "seeds": 40,
+      "seconds": 29.2,
+      "seeds": 400,
       "violations": 0
     },
     "projects_routes": {
