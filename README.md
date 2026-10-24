@@ -35,6 +35,9 @@ A full paired trial (`python3 harness/bench.py <shape> <seed>`) needs API keys f
 **SOC 2 assessment accuracy (separate lane).** [soc2_accuracy/](soc2_accuracy/) measures how often Edge Sentinel's readiness assessment concludes more than its evidence supports, on synthetic fixtures with a
 labelled truth. It is scored on its own, reports no aggregate score, and makes no claim about anyone's compliance.
 
+**Runtime-adversarial (separate lane).** [runtime_adversarial/](runtime_adversarial/) runs the governed suite against pinned revisions of the runtime with a run manifest and a map of the plan's test families to what is
+tested (counts per family, no score; no false-denial rate is measured).
+
 **Evidence.** [results/final_report.json](results/final_report.json), [results/full_matrix.json](results/full_matrix.json), [writeup/does-formal-orchestration-help.md](writeup/does-formal-orchestration-help.md).
 
 **Limitations.** See the Scope-of-the-claim paragraph and the write-up's "What would change the verdict" section.
