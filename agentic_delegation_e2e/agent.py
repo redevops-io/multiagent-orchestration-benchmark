@@ -15,11 +15,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import json
 import os
 import re
 import sys
 import time
+import urllib.error
 import urllib.request
 import uuid
 from pathlib import Path
@@ -73,8 +75,16 @@ class LLM:
         body = json.dumps({"model": self.model, "messages": messages, "temperature": self.temperature, "seed": self.seed, "max_tokens": 700}).encode()
         req = urllib.request.Request(self.base + "/chat/completions", data=body, headers={"Content-Type": "application/json", "Authorization": "Bearer " + os.environ.get("LLM_API_KEY", "none")})
         t0 = time.time()
-        with urllib.request.urlopen(req, timeout=180) as r:
-            out = json.loads(r.read())
+        for attempt in range(4):                                # a dropped connection is retried with the identical request; every retry is on the trace
+            try:
+                with urllib.request.urlopen(req, timeout=180) as r:
+                    out = json.loads(r.read())
+                break
+            except (http.client.HTTPException, urllib.error.URLError, TimeoutError, ConnectionError) as e:
+                self.trace({"kind": "llm_transport_error", "agent": agent, "attempt": attempt + 1, "error": type(e).__name__})
+                if attempt == 3:
+                    raise
+                time.sleep(5 * (attempt + 1))
         text = out["choices"][0]["message"].get("content") or ""
         u = out.get("usage") or {}
         self.calls += 1

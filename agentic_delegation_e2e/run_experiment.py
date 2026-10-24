@@ -134,6 +134,7 @@ def main() -> int:
     ap.add_argument("--trials", type=int, default=1)
     ap.add_argument("--defect", choices=["none", "weak_authority"], default="none")
     ap.add_argument("--timeout", type=int, default=1500)
+    ap.add_argument("--cells", default="", help="run only these arm:trial cells, e.g. baseline-subset:0,governed:2 (a continuation of an earlier run; the earlier failures stay on record)")
     ap.add_argument("--scenario", default="scenario.json", choices=["scenario.json", "scenario-2.json"])
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--out", default=str(HERE / "runs" / time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())))
@@ -148,8 +149,11 @@ def main() -> int:
     imgs = build_images(args.agentic_os, tag)
     start = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     runs = []
+    cells = {tuple(c.split(":")) for c in args.cells.split(",") if c}
     for trial in range(args.trials):
         for arm in args.arms.split(","):
+            if cells and (arm, str(trial)) not in cells:
+                continue
             rec = one_run(arm, trial, imgs, args, out, scenario)
             runs.append(rec)
             ev = rec.get("evaluation") or {}
@@ -165,7 +169,7 @@ def main() -> int:
         "prompts_sha256": {"orchestrator": hashlib.sha256(A.system_prompt("orchestrator", A.ORCHESTRATOR_TOOLS, True).encode()).hexdigest(), "helper": hashlib.sha256(A.system_prompt("helper", list(A.CATALOG), False).encode()).hexdigest()},
         "tools": {k: v[0] for k, v in A.CATALOG.items()}, "isolation": {"internal_network": all(r.get("network_internal") for r in runs), "egress_allowlist": "the model endpoint only", "all_runs_isolation_ok": all(r.get("isolation_ok") for r in runs),
                                                                     "provider_has_no_route_out": True, "note": "the provider container is on the internal network only"},
-        "runs": [{k: v for k, v in r.items() if k != "evaluation"} for r in runs],
+        "cells_requested": sorted(":".join(c) for c in cells) or "all", "runs": [{k: v for k, v in r.items() if k != "evaluation"} for r in runs],
         "claims": "A small number of runs of one scenario with one model. Not statistical evidence. Counts are reported per arm; no rate, score or significance is computed. Effects are judged from the provider's database, not from receipts.",
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1))
