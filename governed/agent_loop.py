@@ -73,6 +73,8 @@ def s6_agent_in_the_loop(seed: int, tmp: Path) -> Result:
                           budget=AutonomyBudget(usd=2.0, tokens=200, wall_clock_s=10 ** 6, max_actions=6, max_children=0, max_depth=0, max_parallel=1))
     scope = ScopePin.from_envelope(guard.envelopes.get(child.key))
 
+    unknown_actions: set = set()                        # business actions (capability, invoice, amount) whose first attempt ended unknown: a retry is refused on purpose
+    refunds_reached = [0]
     effects: list = []                                  # (capability, canonical args): what really happened at the provider
     sends: list = []
     lock = threading.Lock()
@@ -86,6 +88,7 @@ def s6_agent_in_the_loop(seed: int, tmp: Path) -> Result:
                 effects.append((cap, json.dumps(args, sort_keys=True)))
             if cap == "billing.refund" and timeouts_on and not first_refund["done"] and args.get("invoice") == "INV-1":
                 first_refund["done"] = True
+                unknown_actions.add((cap, args.get("invoice"), args.get("amount")))
                 raise TimeoutError("timed out after the request was written")
             return HandlerResult(ok=True, output={"ok": True, "cap": cap, "provider_object_id": f"obj_{len(effects)}"})
         return handler
@@ -116,7 +119,16 @@ def s6_agent_in_the_loop(seed: int, tmp: Path) -> Result:
                 key = hashlib.sha256((cap + json.dumps(args, sort_keys=True)).encode()).hexdigest()[:24]
             else:
                 key = uuid.uuid4().hex[:24]              # a careless wrapper: every retry looks like a new action
+            biz = (cap, args.get("invoice"), args.get("amount"))
+            # legitimate by the oracle's own reading of the child's grant: a refund within the per-action limit, with calls left, and not a retry of an action whose outcome is still unknown
+            legit = (cap == "billing.refund" and isinstance(args.get("amount"), (int, float)) and 0 < args["amount"] <= 100 and refunds_reached[0] < 3 and biz not in unknown_actions)
+            before = len(sends)
             r = gw.invoke(GatewayRequest(gp, cap, dict(args), idempotency_key=key, credential=child.credential))
+            reached = len(sends) > before                    # the provider was asked: allowed, whatever the provider then did
+            if cap == "billing.refund" and reached:
+                refunds_reached[0] += 1
+            if legit:
+                out.legit(reached, f"{biz} was within the child's grant and was not executed: {getattr(r.decision, 'reason', '') if r.decision else r.status}")
             reasons.append(getattr(r.decision, "reason", "") if r.decision else "")
             ok, text, err = _tool_result_to_text(r)
             return ToolResult(ok=ok, text=text or (err or ""), error=err)

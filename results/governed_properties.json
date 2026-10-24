@@ -1,17 +1,20 @@
 {
   "agent_harness": "6b8ba3a596a5",
-  "agentic_os": "47ca5097a86a",
-  "context_runtime": "1ab9635152f1",
+  "agentic_os": "54d3dc2b22f2",
+  "context_runtime": "0811760494ff",
   "profile": "production",
-  "projects_routes_note": "carried over from the run at agentic-os c5ecac7e5016; skipped in this run (dependency missing locally), run by CI",
   "python": "3.12.15",
   "scenarios": {
     "agent_in_the_loop": {
-      "checks": 4200,
+      "checks": 4297,
+      "false_denial_rate": 0.0,
+      "first_false_denials": [],
       "first_violations": [],
+      "legitimate_actions": 300,
+      "legitimate_refused": 0,
       "sample_meta": {
         "deterministic_keys": true,
-        "effects": 0,
+        "effects": 1,
         "placeholder_blocked": 1,
         "sentinel_events": 2,
         "stop": "done",
@@ -19,13 +22,17 @@
         "timeouts": false,
         "turns": 12
       },
-      "seconds": 4.0,
+      "seconds": 4.5,
       "seeds": 300,
       "violations": 0
     },
     "child_agent_tree": {
       "checks": 77707,
+      "false_denial_rate": 0.0,
+      "first_false_denials": [],
       "first_violations": [],
+      "legitimate_actions": 1150,
+      "legitimate_refused": 0,
       "sample_meta": {
         "active_at_end": 0,
         "agents": 5,
@@ -37,7 +44,11 @@
     },
     "compaction_fuzz": {
       "checks": 39412,
+      "false_denial_rate": null,
+      "first_false_denials": [],
       "first_violations": [],
+      "legitimate_actions": 0,
+      "legitimate_refused": 0,
       "sample_meta": {
         "histories": 30
       },
@@ -47,7 +58,11 @@
     },
     "fork_crash_restart": {
       "checks": 82156,
+      "false_denial_rate": null,
+      "first_false_denials": [],
       "first_violations": [],
+      "legitimate_actions": 0,
+      "legitimate_refused": 0,
       "sample_meta": {
         "applied_on_timeout": false,
         "b_attempts": 2,
@@ -55,13 +70,17 @@
         "parallel_branches": false,
         "uncrashed_points": 2
       },
-      "seconds": 165.3,
+      "seconds": 171.8,
       "seeds": 300,
       "violations": 0
     },
     "goal_loop_chaos": {
       "checks": 8650,
+      "false_denial_rate": null,
+      "first_false_denials": [],
       "first_violations": [],
+      "legitimate_actions": 0,
+      "legitimate_refused": 0,
       "sample_meta": {
         "final": "limit",
         "goal_caps": [
@@ -80,13 +99,17 @@
         },
         "resends_after_negative": 0
       },
-      "seconds": 16.8,
+      "seconds": 17.2,
       "seeds": 300,
       "violations": 0
     },
     "projects_routes": {
       "checks": 45,
+      "false_denial_rate": 0.0,
+      "first_false_denials": [],
       "first_violations": [],
+      "legitimate_actions": 19,
+      "legitimate_refused": 0,
       "sample_meta": {
         "human_decisions": 8,
         "write_routes": 18
@@ -97,7 +120,11 @@
     },
     "provider_reconciliation": {
       "checks": 3692,
+      "false_denial_rate": 0.0,
+      "first_false_denials": [],
       "first_violations": [],
+      "legitimate_actions": 77,
+      "legitimate_refused": 0,
       "sample_meta": {
         "crash": false,
         "crashed": false,
@@ -113,7 +140,7 @@
         "stale": false,
         "transient_rounds": 0
       },
-      "seconds": 3.8,
+      "seconds": 4.0,
       "seeds": 300,
       "violations": 0
     }

@@ -479,6 +479,10 @@
         {
           "file": "tests/test_goal_loop.py",
           "name": "cancelling_a_waiting_loop_cancels_the_mission_and_lists_what_it_may_have_left"
+        },
+        {
+          "file": "tests/test_goal_loop_children.py",
+          "name": "a_cancelled_loop_ends_its_children"
         }
       ],
       "note": ""
@@ -498,6 +502,14 @@
         {
           "file": "tests/test_child_agents.py",
           "name": "a_credential_that_does_not_fully_hold_is_refused"
+        },
+        {
+          "file": "tests/test_goal_loop_children.py",
+          "name": "a_child_stays_alive_for_as_long_as_the_loop_drives_its_mission_and_dies_without_the_wiring"
+        },
+        {
+          "file": "tests/test_goal_loop_children.py",
+          "name": "a_revoked_child_is_not_a_lost_child_and_is_never_revived"
         }
       ],
       "note": ""
@@ -595,6 +607,10 @@
         {
           "file": "tests/test_sandbox_required.py",
           "name": "required_isolation_without_a_sandbox_fails_closed"
+        },
+        {
+          "file": "tests/test_membrane_platform.py",
+          "name": "a_memory_ceiling_that_cannot_be_applied_is_refused_by_name_before_anything_runs"
         }
       ],
       "note": "Python components only; no network-namespace or container-level test."
