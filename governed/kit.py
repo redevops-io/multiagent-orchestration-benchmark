@@ -28,6 +28,30 @@ def import_agentic_os(path: "str | None" = None) -> str:
         return "installed"
 
 
+def import_agent_stack(agent_harness: "str | None" = None, context_runtime: "str | None" = None) -> dict:
+    """Make `agent_harness` and `context_runtime` importable (paths, $AGENT_HARNESS_PATH / $CONTEXT_RUNTIME_PATH, or installed). A scenario that
+    needs them reports an ERROR when they are missing: the agent-in-the-loop scenario is meaningless without the real loop and context manager."""
+    for path, env in ((agent_harness, "AGENT_HARNESS_PATH"), (context_runtime, "CONTEXT_RUNTIME_PATH")):
+        p = path or os.environ.get(env)
+        if p:
+            sys.path.insert(0, str(Path(p).resolve()))
+    info = {}
+    for mod in ("agent_harness", "context_runtime"):
+        try:
+            m = __import__(mod)
+            root = Path(m.__file__).resolve().parent.parent
+            head = root / ".git" / "HEAD"
+            try:
+                ref = head.read_text().strip()
+                ref = (root / ".git" / ref[5:]).read_text().strip() if ref.startswith("ref: ") else ref
+                info[mod] = ref[:12]
+            except Exception:  # noqa: BLE001
+                info[mod] = "installed"
+        except Exception as e:  # noqa: BLE001
+            info[mod] = f"not importable ({type(e).__name__})"
+    return info
+
+
 class Provider:
     """The EXTERNAL system. Executes each idempotency key at most once; `calls[key]` counts every send, `effects[key]` every real effect.
     `timeout_keys`: the request is written (the effect applies when `applied_on_timeout`) and then the caller sees a timeout: UNKNOWN.

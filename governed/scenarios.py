@@ -478,3 +478,17 @@ SCENARIOS = {
     "compaction_fuzz": (s4_compaction_fuzz, 40),
     "projects_routes": (s5_projects_routes, 1),
 }
+
+
+def _register_agent_loop() -> None:
+    from .agent_loop import s6_agent_in_the_loop
+    SCENARIOS["agent_in_the_loop"] = (s6_agent_in_the_loop, 30)
+
+
+def _register_provider_reconciliation() -> None:
+    from .provider_recon import s7_provider_reconciliation
+    SCENARIOS["provider_reconciliation"] = (s7_provider_reconciliation, 60)
+
+
+_register_agent_loop()
+_register_provider_reconciliation()
