@@ -9,7 +9,7 @@ search tool can answer without finding anything. This checks what a scaffold act
   network that is not firewalled or whose allowlist is not limited to the run's LLM endpoint; provider-side tools (web search, URL fetch, remote MCP) enabled.
   REVIEW items (heuristic, a person reads them): a trajectory that mentions an issue tracker, an advisory, a changelog, upstream history commands, or a commit hash prefix.
 
-It audits what is described to it. A container property nobody recorded is not audited."""
+It audits what is described to it. A container property nobody recorded is not audited. `collect_audit.py` produces the record from a live container."""
 from __future__ import annotations
 
 import argparse
@@ -82,6 +82,17 @@ def audit(rec: dict) -> dict:
     on = [t for t in tools if any(p in t for p in PROVIDER_TOOLS)]
     if on:
         leaks.append(f"provider-side or remote tools enabled: {sorted(set(on))}")
+    if rec.get("tools") is None and "tools_disallowed" in rec:
+        # a scaffold that is configured by what it DISABLES (upstream's claude-code arm passes --disallowedTools): the enabled set is not listed, so the provider-side tools must each be named as disabled
+        off = {str(t).lower() for t in rec.get("tools_disallowed") or []}
+        missing = sorted(t for t in ("webfetch", "websearch") if t not in off)
+        if missing:
+            leaks.append(f"provider-side tools are not disabled: {missing} (an enabled set was not recorded, so only an explicit disallow counts)")
+        review.append("tools were recorded as a disallow list only: a tool added to the scaffold later, beyond those named, is not covered")
+    if rec.get("mcp_servers"):
+        leaks.append(f"remote MCP servers are configured: {sorted(map(str, rec['mcp_servers']))}")
+    if rec.get("files_truncated"):
+        review.append("the file listing was cut short: files beyond the cap were not audited")
     traj = str(rec.get("trajectory", ""))
     for t in toks:
         if t in traj:

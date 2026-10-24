@@ -434,3 +434,143 @@ def test_more_than_one_recorded_attempt_is_a_problem_and_the_last_one_is_used(tm
     run_dir(tmp_path, PLANNED[0], "e2e", {"attempts": [att(stage3="failed", success=False), att(attempt=2)]})
     rows, _, problems = AR.assemble(tmp_path, PLANNED[:1])
     assert rows[0]["stage3"] == "passed" and any("2 attempts recorded" in p for p in problems)
+
+
+# ───────────────────────── collecting the audit record from a container ─────────────────────────
+INSPECT = json.loads((ROOT / "cybergym_e2e" / "fixtures" / "docker_inspect_sample.json").read_text())[0]          # a trimmed real `docker inspect`
+
+
+class FakeDocker:
+    """Docker's three operations with scripted answers. `files` maps a directory (or 'sensitive') to the lines `find` would print."""
+
+    def __init__(self, inspect=None, files=None, configs=None, fail_inspect=False):
+        self.i, self.files, self.configs, self.fail_inspect, self.calls = inspect if inspect is not None else INSPECT, files or {}, configs or {}, fail_inspect, []
+
+    def inspect(self, container):
+        if self.fail_inspect:
+            raise RuntimeError("docker inspect failed: no such container")
+        return self.i
+
+    def exec(self, container, cmd):
+        self.calls.append(cmd)
+        if "-prune" in cmd:
+            return "\n".join(self.files.get("sensitive", []))
+        d = cmd.split()[1]
+        return "\n".join(self.files.get(d, []))
+
+    def read(self, container, path):
+        return self.configs.get(path)
+
+
+def collect(docker=None, **kw):
+    from cybergym_e2e import collect_audit as CA
+    args = dict(task="libx/arvo_62547", mode="e2e", firewall_network="cg-audit-test-net", llm_endpoints=["llm.example"], tools_disallowed=["WebFetch", "WebSearch", "Task"])
+    args.update(kw)
+    return CA.collect(docker or FakeDocker(), "c1", **args)
+
+
+def test_the_record_reads_the_real_inspect_shape_name_hostname_workdir_env_mounts():
+    r = collect()
+    c = r["container"]
+    assert c["name"] == "cg-audit-throwaway" and c["hostname"] == "boxy" and c["workdir"] == "/src" and c["image"] == "agent-base:1"
+    assert c["env"]["HTTPS_PROXY"] == "http://squid:3128" and c["mounts"] == [{"host": "/work/run-77/src", "container": "/src", "rw": False}]
+
+
+def test_the_firewall_is_true_only_on_the_named_network_with_a_proxy_set():
+    assert collect()["network"]["firewall"] is True
+    assert collect(firewall_network="some-other-net")["network"]["firewall"] is False                  # the container is not on the firewall network
+    assert collect(firewall_network=None)["network"]["firewall"] is False                              # nobody said which network is the firewall: not shown
+    no_proxy = json.loads(json.dumps(INSPECT))
+    no_proxy["Config"]["Env"] = [e for e in no_proxy["Config"]["Env"] if "PROXY" not in e.upper()]
+    assert collect(FakeDocker(inspect=no_proxy))["network"]["firewall"] is False                       # on the network but nothing forces traffic through the proxy
+
+
+def test_files_come_from_the_working_directories_and_from_sensitive_names_anywhere_and_are_deduplicated():
+    d = FakeDocker(files={"/src": ["/src", "/src/libx/.git", "/src/crash.log"], "sensitive": ["/src/crash.log", "/usr/lib/x/fix.diff"]})
+    r = collect(d)
+    assert r["container"]["files"].count("/src/crash.log") == 1 and "/usr/lib/x/fix.diff" in r["container"]["files"] and "/src/libx/.git" in r["container"]["files"]
+    assert any("-name '.git'" in c and "-name 'poc.bin'" in c and "-name 'crash.log'" in c for c in d.calls)           # the sensitive-name search covers the names that point at the answer
+    assert any(c.startswith("find /src ") for c in d.calls) and not r["files_truncated"]
+
+
+def test_a_huge_listing_is_capped_and_says_so():
+    from cybergym_e2e import collect_audit as CA
+    r = collect(FakeDocker(files={"/src": [f"/src/f{i}" for i in range(CA.MAX_FILES + 5)]}))
+    assert r["files_truncated"] is True and len(r["container"]["files"]) == CA.MAX_FILES
+    assert any("file listing was cut short" in x for x in L.audit(r)["review"])
+
+
+def test_the_config_in_the_container_is_parsed_and_an_unparseable_one_is_kept_for_review():
+    ok = collect(FakeDocker(configs={"/config/config.toml": 'project = "libx"\ntask_id = "arvo_62547"\n'}), config_path="/config/config.toml")
+    assert ok["config"] == {"project": "libx", "task_id": "arvo_62547"}
+    bad = collect(FakeDocker(configs={"/config/config.toml": "this is = = not toml"}), config_path="/config/config.toml")
+    assert "_unparsed" in bad["config"]
+    assert collect(config_path="/config/missing.toml")["config"] == {}
+
+
+def test_a_leaky_container_is_caught_end_to_end_from_the_collected_record():
+    leaky = json.loads(json.dumps(INSPECT))
+    leaky["Config"]["Env"] += ["TASKREF=62547"]
+    d = FakeDocker(inspect=leaky, files={"/src": ["/src/libx/.git", "/src/crash.log"]}, configs={"/config/config.toml": 'task_id = "arvo_62547"\npatch_commit = "deadbeefcafe"\n'})
+    got = L.audit(collect(d, config_path="/config/config.toml", secret_hashes=["deadbeefcafe"], trajectory="applied the fix from deadbeefcafe"))["leaks"]
+    joined = " | ".join(got)
+    for needle in ("environment variable TASKREF", "carries `task_id`", "carries `patch_commit`", ".git", "crash.log", "withheld"):
+        assert needle in joined, (needle, got)
+
+
+def test_a_clean_container_has_no_hard_leak():
+    d = FakeDocker(files={"/src": ["/src", "/src/libx/lib/a.c"], "/config": ["/config/config.toml"]}, configs={"/config/config.toml": 'project = "libx"\nmode = "e2e"\n'})
+    assert L.audit(collect(d, config_path="/config/config.toml"))["leaks"] == []
+
+
+def test_a_docker_failure_is_an_error_not_an_empty_record():
+    with pytest.raises(RuntimeError):
+        collect(FakeDocker(fail_inspect=True))
+
+
+def test_the_cli_docker_wrapper_reads_inspect_and_treats_find_exit_one_as_output():
+    from cybergym_e2e import collect_audit as CA
+
+    def run(args):
+        class R:
+            returncode, stderr = 0, ""
+        r = R()
+        if args[0] == "inspect":
+            r.stdout = json.dumps([INSPECT])
+        elif args[0] == "exec" and args[2:4] == ["sh", "-c"]:
+            r.returncode, r.stdout = 1, "/src/a\n"                      # find exits 1 when a directory is missing but printed what it found
+        else:
+            r.returncode, r.stdout = 1, ""
+        return r
+    d = CA.Docker(run)
+    assert d.inspect("c")["Name"] == "/cg-audit-throwaway" and d.exec("c", "find /src") == "/src/a\n" and d.read("c", "/x") is None
+
+
+def test_the_real_docker_wrapper_raises_when_inspect_fails():
+    from cybergym_e2e import collect_audit as CA
+
+    class R:
+        returncode, stdout, stderr = 1, "", "Error: No such object: gone"
+    with pytest.raises(RuntimeError) as e:
+        CA.Docker(lambda args: R()).inspect("gone")
+    assert "docker inspect failed" in str(e.value)
+
+
+# ───────────────────────── tools recorded as a disallow list (how upstream configures claude-code) ─────────────────────────
+def test_with_only_a_disallow_list_the_provider_side_tools_must_each_be_named():
+    assert not [x for x in L.audit(collect())["leaks"] if "provider-side" in x]
+    got = L.audit(collect(tools_disallowed=["Task"]))["leaks"]
+    assert any("not disabled" in x and "webfetch" in x and "websearch" in x for x in got)
+    got = L.audit(collect(tools_disallowed=["webfetch", "WEBSEARCH"]))["leaks"]                       # case does not matter
+    assert not [x for x in got if "provider-side" in x]
+
+
+def test_a_record_with_neither_an_enabled_list_nor_a_disallow_list_is_not_shown_to_disable_the_tools():
+    r = collect(tools_disallowed=None)
+    assert any("not disabled" in x for x in L.audit(r)["leaks"])
+
+
+def test_an_explicit_enabled_list_still_works_and_remote_mcp_servers_are_a_leak():
+    assert L.audit(collect(tools=["bash", "read"], tools_disallowed=None))["leaks"] == []                      # an explicit enabled list with no provider-side tool is enough
+    assert any("remote MCP" in x for x in L.audit(collect(mcp_servers=["https://tools.example/mcp"]))["leaks"])
+    assert any("provider-side or remote tools enabled" in x for x in L.audit(collect(tools=["bash", "web_search"], tools_disallowed=None))["leaks"])
