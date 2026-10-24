@@ -39,6 +39,14 @@ Listed in every report under `not_built`, and as `not_tested` items. The four ca
 | I02 container and network policy | `infra.py network_isolation`: a throwaway `--internal` docker network, the repository's own egress image, an origin whose own log is the oracle, a positive control on the outside network. Kubernetes manifest checked statically | Enforcement of the NetworkPolicy by a cluster is not tested |
 | I04 image pinning / I05 tamper-evident logs | `infra.py image_pinning` (fixture-checked classifier; the repository's mutable references are open findings that may only shrink, `image_pin_baseline.json`); `infra.py log_chain` (edit, delete, reorder, insert, replay, hash-stripping detected by the chain alone) | A digest's existence in a registry is not checked. Tail truncation, an appended valid-looking event and a consistent rewrite are invisible to the chain alone and are caught only by an anchored head: listed as known limits |
 
+Limits kept explicit (none of these is closed by a green lane):
+* Retrieval ACLs: caller-level scoping is tested; document-level authorization is not.
+* Delegation: authority propagation is tested; model-initiated delegation is not.
+* Network isolation: Docker isolation is tested; Kubernetes NetworkPolicy enforcement is not.
+* Log integrity: hash-chain consistency is tested; externally anchored completeness is not.
+* Image pinning: mutable references are detected and the open ones stay tracked findings (51 at the pinned revision, `image_pin_baseline.json`); registry availability and signature verification are separate checks.
+* `rag_indexer_identity` is also run against the revision before the fix (`PINS.json` `defective_revisions`) and CI requires it to fail there.
+
 Also not covered: a webhook path; per-document ACLs inside one tenant's store; the enterprise store and extensions (a separate track: the private repositories are not available to public CI); and the expensive multi-model and multi-replica tests the plan puts on a schedule.
 
 Every new check has a defect-seeded variant that CI runs and requires to fail (`GOVERNED_CROSS_MODEL_BUG`, `GOVERNED_RETRIEVAL_BUG`, `GOVERNED_INDEXER_BUG`, `RA_NETWORK_BUG`, `RA_PINNING_BUG`, `RA_LOG_BUG`).

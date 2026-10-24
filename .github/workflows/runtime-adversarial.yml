@@ -58,6 +58,14 @@ jobs:
           repository: redevops-io/redevops-rag
           ref: ${{ steps.pins.outputs.redevops_rag }}
           path: redevops-rag
+      - name: Read the defective revision
+        id: bad
+        run: python3 -c "import json; print('rev=' + json.load(open('runtime_adversarial/PINS.json'))['defective_revisions']['rag_indexer_identity']['revision'])" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: redevops-io/agentic-os
+          ref: ${{ steps.bad.outputs.rev }}
+          path: agentic-os-defective
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -92,6 +100,7 @@ jobs:
             GOVERNED_RETRIEVAL_BUG=$b must_fail "retrieval: $b" gov retrieval_isolation
           done
           GOVERNED_INDEXER_BUG=join must_fail "indexer: pair joined into a file name" gov rag_indexer_identity
+          must_fail "indexer: the pre-fix agentic-os revision (index files shared between different pairs)" python governed/run_governed.py --agentic-os agentic-os-defective --only rag_indexer_identity --seeds 12 --out "$RUNNER_TEMP/old.json"
           RA_NETWORK_BUG=open_network must_fail "network: internal network created open" python runtime_adversarial/infra.py --agentic-os agentic-os --only network_isolation
           RA_PINNING_BUG=accept_all must_fail "pinning: checker accepts every reference" python runtime_adversarial/infra.py --agentic-os agentic-os --only image_pinning
           RA_LOG_BUG=no_verify must_fail "log: verifier that accepts everything" python runtime_adversarial/infra.py --agentic-os agentic-os --only log_chain

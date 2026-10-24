@@ -3,7 +3,7 @@
   "sources": {
     "agentic-os": {
       "repo": "redevops-io/agentic-os",
-      "revision": "313fa15f37eea8696d2a91b8063998d27469d0f9",
+      "revision": "c514437a2a027c9fd548be1df6d5341f1f310fb1",
       "as_of": "2026-10-24",
       "ref": "main"
     },
@@ -27,5 +27,12 @@
     }
   },
   "suite": "governed",
-  "seeds": 12
+  "seeds": 12,
+  "defective_revisions": {
+    "rag_indexer_identity": {
+      "repo": "redevops-io/agentic-os",
+      "revision": "313fa15f37eea8696d2a91b8063998d27469d0f9",
+      "note": "agentic-os main before #576: different (project, source) pairs could share an index file. The check must FAIL here (107 violations at 12 seeds) and pass on the pinned revision."
+    }
+  }
 }

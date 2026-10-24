@@ -1,6 +1,6 @@
 {
  "note": "Mutable image references that are open findings in the pinned agentic-os. This list may only shrink; a new entry fails the lane. Regenerate deliberately with --write-baseline when bumping PINS.json.",
- "revision": "313fa15f37eea8696d2a91b8063998d27469d0f9",
+ "revision": "c514437a2a027c9fd548be1df6d5341f1f310fb1",
  "open": [
   {
    "file": "Dockerfile",
