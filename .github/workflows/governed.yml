@@ -23,8 +23,7 @@ jobs:
         with:
           repository: redevops-io/agentic-os
           path: agentic-os-before-fork-parity
-          ref: 05dd311
-          fetch-depth: 0
+          ref: 05dd311424433cf25344f93927b2b08a47e1d05d
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

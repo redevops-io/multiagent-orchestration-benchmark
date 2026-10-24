@@ -29,7 +29,7 @@ could not run. A scenario that cannot run is reported as an error, never counted
 ## Does the suite detect anything?
 
 A suite that only ever passes proves little, so CI also runs a scenario against an `agentic-os` revision that predates the behaviour and requires it to **fail**:
-`fork_crash_restart` against the commit before fork reconciliation parity (`05dd311`). Against that commit it reports hundreds of violations (an unknown outcome failed the branch and
+`fork_crash_restart` against the commit before fork reconciliation parity (`05dd311`, full SHA in the workflow). Against that commit it reports hundreds of violations (an unknown outcome failed the branch and
 left a reservation open); against current `agentic-os` it reports none.
 
 ## Limits
