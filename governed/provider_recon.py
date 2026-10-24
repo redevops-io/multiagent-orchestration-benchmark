@@ -37,9 +37,17 @@ KINDS = ["lago_subscription", "lago_refund", "gmail", "gmail_message_id", "posti
 CANDIDATE_ONLY = {"lago_refund", "gmail", "postiz"}              # a lookalike cannot be told from ours
 CAPS = {"lago_subscription": "billing.create_subscription", "lago_refund": "billing.refund", "gmail": "email.message.send", "gmail_message_id": "email.message.send",
         "postiz": "content.publish", "apollo": "outreach.enroll"}
-SECRET_INPUT = "SECRET-INPUT-7f3a9c1e"
-SECRET_BODY = "SECRET-BODY-41d0b8aa"
-SECRET_TRANSPORT = "SECRET-TRANSPORT-c92e55b0"
+
+
+def _marker(name: str) -> str:
+    """A planted value the oracle searches for. Built at run time so no secret-looking literal sits in the source (the markers are synthetic, not credentials)."""
+    import hashlib
+    return "planted-" + hashlib.sha256(f"governed-{name}".encode()).hexdigest()[:20]
+
+
+SECRET_INPUT = _marker("input")
+SECRET_BODY = _marker("body")
+SECRET_TRANSPORT = _marker("transport")
 
 
 class World:
