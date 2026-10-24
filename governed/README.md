@@ -14,6 +14,7 @@ mechanism checks, not a comparison of strategies and not performance measurement
 | `child_agent_tree` | Random spawn, spend, close, revoke, narrow and clock steps over a tree of delegated agents | No agent holds more than its parent grants; nothing is spent beyond the root's budget or an agent's allowance; an agent under a revoked, narrowed or expired ancestor is denied; a credential verifies only for an active agent whose driver is alive |
 | `compaction_fuzz` | Random histories with planted look-alike scope blocks, instruction-laden tool results and failing summarizers | The owner's pinned scope is first and intact after every compaction; a summary of untrusted content is labelled and never given the system role; a failing summarizer never costs history |
 | `agent_in_the_loop` | A real agent loop ([agent-harness](https://github.com/redevops-io/agent-harness) `run_loop`) with context managed by [context-runtime](https://github.com/redevops-io/context-runtime)'s transcript compactor, its tools bound to the governed gateway under a child agent identity, driven by a worst-case model that obeys instructions planted in tool results, retries at once after a timeout and copies a context stub into an argument | Nothing out of scope or above a grant limit takes effect; the child's allowance bounds the damage; a call with an unknown outcome is not sent again (when the tool derives its key from the call); the owner's scope stays first in the context and nothing else holds the system role; an action carrying a context stub is never run; the loop honours its limits; every call is audited |
+| `provider_reconciliation` | A timed-out call to a simulated Lago, Gmail, Postiz or Apollo (the effect applied or was lost), reconciled by the real supervisor and probes under hidden records, transient lookup failures, unrelated lookalike records, stale records, a dropped Message-ID and a supervisor crash mid-round | Nothing is settled as executed unless the effect is in the provider; nothing is released as not executed or sent again; a provider that cannot tie a record to the request never settles on a lookalike by default; an identified, visible effect settles without a person; an unresolved job ends escalated once; probing only reads; no secret reaches the reconciliation records; a crash changes nothing |
 | `projects_routes` | Every write route of the Projects API in the production profile | An unauthenticated or wrongly authenticated write is refused before any handler runs; a service identity never makes a human decision; the operator credential is accepted |
 
 ## Run
@@ -37,7 +38,18 @@ against the commit before the gateway refused to resend a direct call with an un
 The agent-in-the-loop scenario is the one that was missing while the suite only drove the kernel with scripted code. It was added after checking how agents actually reach the governed
 paths (the benchmark's workers run through the `sidekick` CLI; the apps' agents use context-runtime's `AgentConsole`; a multi-turn agent is agent-harness's `run_loop`), and it found that gap.
 
+`provider_reconciliation` is checked two other ways, because its oracle is written from the simulator's ground truth and must be able to fail. With `GOVERNED_NAIVE_ADAPTERS=1` the probes trust a
+single lookalike record as proof; the oracle reports the false confirmations (a refund, an email or a post that someone else made, settled as ours). With `GOVERNED_NO_EFFECT_REF=1` the runtime does not
+record what identifies an effect at the provider (the behaviour before `agentic-os` #566); every probe is then unsupported and the oracle reports the identified effects that were not settled. CI
+requires both runs to fail.
+
 ## Limits
+
+* `provider_reconciliation` runs against simulators built from each provider's documentation (Lago, Gmail, Postiz, Apollo), not against the live services: response shapes the documentation does not
+  guarantee (how Postiz stores post content, whether Gmail keeps a client Message-ID, how soon a sent message is searchable, whether Apollo labels a contact's sequence status) are modelled as the
+  adapters assume them and are not verified. Rate limits are not simulated beyond a 429 with Retry-After. A simulator that is wrong about a provider makes the check pass for the wrong reason.
+* In that scenario a candidate (a record with the same fields) is never trusted by default, so most refund, email and post cases end escalated. That is the property, not a gap in coverage; the opt-in that
+  trusts a unique match is not exercised, because it is documented to accept an unrelated record that looks the same.
 
 * The oracles are written from the properties the runtime claims; they are only as good as those statements. A property nobody wrote down is not checked.
 * Faults are seeded and bounded. A pass means no violation was found in the explored space, not that none exists.

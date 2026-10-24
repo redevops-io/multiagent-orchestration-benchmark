@@ -485,4 +485,10 @@ def _register_agent_loop() -> None:
     SCENARIOS["agent_in_the_loop"] = (s6_agent_in_the_loop, 30)
 
 
+def _register_provider_reconciliation() -> None:
+    from .provider_recon import s7_provider_reconciliation
+    SCENARIOS["provider_reconciliation"] = (s7_provider_reconciliation, 60)
+
+
 _register_agent_loop()
+_register_provider_reconciliation()

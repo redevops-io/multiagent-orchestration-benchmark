@@ -69,6 +69,21 @@ jobs:
           assert d["scenarios"]["agent_in_the_loop"]["violations"] > 0, d
           print("negative control failed as required:", d["scenarios"]["agent_in_the_loop"]["violations"], "violations")
           PY
+      - name: Negative controls for the provider-reconciliation scenario (must fail)
+        run: |
+          for control in GOVERNED_NAIVE_ADAPTERS GOVERNED_NO_EFFECT_REF; do
+            if env "$control=1" python governed/run_governed.py --agentic-os agentic-os --only provider_reconciliation --seeds 60 --out "$RUNNER_TEMP/$control.json"; then
+              echo "the provider-reconciliation oracle did not detect $control" >&2
+              exit 1
+            fi
+            CONTROL="$control" python - <<'PY'
+          import json, os
+          d = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], os.environ["CONTROL"] + ".json")))
+          v = d["scenarios"]["provider_reconciliation"]["violations"]
+          assert v > 0, d
+          print(os.environ["CONTROL"], "detected:", v, "violations")
+          PY
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: governed_properties
