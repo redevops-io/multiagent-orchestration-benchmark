@@ -10,7 +10,7 @@ to re-check the gates and raw results.
 
 **Maturity: internally reproduced** research result. Committed results, no tags or releases; not externally reproduced. See [STATUS.md](STATUS.md).
 
-**Positioning (read this next to ReDevOps product copy).** The write-up's own conclusion is: *"the evidence does not support adopting
+**Scope of the claim.** The write-up's own conclusion is: *"the evidence does not support adopting
 formal runtime-managed orchestration as a blanket mechanism."* Its stated scope is narrow: *"This is a **mechanism test, not a leaderboard**,
 and it is small"*, *"**N is small** (11 paired)"*, Kotlin tasks that are *"toy-scale"*, *"one judge family"*, *"one manager model"*, and
 *"worker token cost wasn't metered"*. It therefore says nothing about other task types, larger refactors, or governed-runtime properties
@@ -30,7 +30,7 @@ A full paired trial (`python3 harness/bench.py <shape> <seed>`) needs API keys f
 
 **Evidence.** [results/final_report.json](results/final_report.json), [results/full_matrix.json](results/full_matrix.json), [writeup/does-formal-orchestration-help.md](writeup/does-formal-orchestration-help.md).
 
-**Limitations.** See the Positioning paragraph and the write-up's "What would change the verdict" section.
+**Limitations.** See the Scope-of-the-claim paragraph and the write-up's "What would change the verdict" section.
 
 Does **formal runtime-managed orchestration** (isolation contracts + a runtime *integration mission*)
 actually beat **emergent supervisor-led orchestration** (one strong manager decomposing work, running
