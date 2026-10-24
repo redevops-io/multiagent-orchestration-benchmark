@@ -1,0 +1,59 @@
+name: soc2-accuracy
+# The SOC 2 assessment-accuracy lane (soc2_accuracy/): offline, synthetic fixtures, no model calls. It runs against the default branch of agentic-os. Two negative controls must FAIL:
+# a naive assessor, and the agentic-os revision before the SEC-CFG-01 completeness fix, so the lane cannot quietly stop detecting anything.
+on:
+  pull_request:
+  push:
+    branches: ["master"]
+  schedule:
+    - cron: "41 5 * * 1"
+permissions:
+  contents: read
+jobs:
+  soc2-accuracy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: redevops-io/agentic-os
+          path: agentic-os
+      - uses: actions/checkout@v4
+        with:
+          repository: redevops-io/agentic-os
+          path: agentic-os-before-scan-fix
+          ref: 05fd9a3a72635123865ca0bafc18ca8d7d7fb591
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Lane against the current Edge Sentinel
+        run: python soc2_accuracy/run_soc2.py --edge-sentinel agentic-os --seeds 20
+      - name: Negative control, naive assessor (must fail)
+        run: |
+          if python soc2_accuracy/run_soc2.py --edge-sentinel agentic-os --seeds 3 --control naive --out "$RUNNER_TEMP/naive.json"; then
+            echo "the oracle did not detect a naive assessor" >&2
+            exit 1
+          fi
+          python - <<'PY'
+          import json, os
+          d = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "naive.json")))
+          assert d["gates"]["false_pass"] > 0, d["gates"]
+          print("naive assessor detected:", d["gates"]["false_pass"], "false passes")
+          PY
+      - name: Negative control, Edge Sentinel before the completeness fix (must fail)
+        run: |
+          if python soc2_accuracy/run_soc2.py --edge-sentinel agentic-os-before-scan-fix --seeds 3 --out "$RUNNER_TEMP/pre.json"; then
+            echo "the lane did not detect the scan completeness bug" >&2
+            exit 1
+          fi
+          python - <<'PY'
+          import json, os
+          d = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "pre.json")))
+          assert d["gates"]["false_pass"] > 0, d["gates"]
+          print("the historical bug was detected:", d["first_violations"]["false_pass"][0])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: soc2_assessment_accuracy
+          path: results/soc2_assessment_accuracy.json

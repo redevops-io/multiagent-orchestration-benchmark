@@ -32,6 +32,9 @@ A full paired trial (`python3 harness/bench.py <shape> <seed>`) needs API keys f
 [governed/](governed/), checks some of those guarantees for the ReDevOps runtime with seeded fault injection and an oracle: `python3 governed/run_governed.py`
 (needs an [`agentic-os`](https://github.com/redevops-io/agentic-os) checkout; no API keys). It is not part of the paired comparison and changes none of its results.
 
+**SOC 2 assessment accuracy (separate lane).** [soc2_accuracy/](soc2_accuracy/) measures how often Edge Sentinel's readiness assessment concludes more than its evidence supports, on synthetic fixtures with a
+labelled truth. It is scored on its own, reports no aggregate score, and makes no claim about anyone's compliance.
+
 **Evidence.** [results/final_report.json](results/final_report.json), [results/full_matrix.json](results/full_matrix.json), [writeup/does-formal-orchestration-help.md](writeup/does-formal-orchestration-help.md).
 
 **Limitations.** See the Scope-of-the-claim paragraph and the write-up's "What would change the verdict" section.

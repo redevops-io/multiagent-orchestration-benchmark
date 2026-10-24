@@ -17,6 +17,7 @@ Across 11 paired comparisons, gate-pass was 11/11 in both arms and cost, quality
 
 - `python3 validate_gates.py` (needs `kotlinc` and JDK 17+, no API keys) and `harness/bench.py` for paired trials (needs API keys in the environment).
 - `python3 governed/run_governed.py` (needs an `agentic-os` checkout or install; no API keys, no model calls): `results/governed_properties.json` records the last run and the `agentic-os` revision it ran against.
+- `python3 soc2_accuracy/run_soc2.py` (needs an `agentic-os` checkout; no API keys, no model calls): `results/soc2_assessment_accuracy.json`, a separate lane with its own gates and no aggregate score.
 
 ## Not supported / not established
 
