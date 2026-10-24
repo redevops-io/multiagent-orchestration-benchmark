@@ -1,0 +1,20 @@
+name: assurance-contracts
+# Fast contract tests for the assurance lanes that have an adapter here. No LLM keys, no exploit dataset, no network beyond installing pytest. They run in parallel with the other workflows on every
+# pull request. (The SOC 2 lane has its own workflow, soc2-accuracy.yml.)
+on:
+  pull_request:
+  push:
+    branches: ["master"]
+permissions:
+  contents: read
+jobs:
+  cybergym-adapter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pytest
+      - run: python -m pytest cybergym_e2e/test_cybergym_adapter.py -q
