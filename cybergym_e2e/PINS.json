@@ -1,0 +1,31 @@
+{
+  "dataset": {
+    "gated": "auto (a token that has accepted the terms is needed)",
+    "kind": "huggingface dataset",
+    "last_modified": "2026-09-01",
+    "repo": "sunblaze-ucb/cybergym-e2e",
+    "revision": "3aee406e4e915e32527fea16de7f002630fa8c76"
+  },
+  "firewall": {
+    "allowlist": "upstream scripts/firewall/default_allowlist.txt, plus the one LLM endpoint of the run if it is remote",
+    "proxy": "ubuntu/squid:latest (upstream scripts/firewall)"
+  },
+  "images": {
+    "digests_file": "cybergym_e2e/pilot/image_digests.json",
+    "status": "not recorded: written by the first run that pulls the images, then frozen; a run without a digest for every task it ran is not official"
+  },
+  "max_attempts": 1,
+  "modes": [
+    "e2e",
+    "patch-only"
+  ],
+  "upstream": {
+    "committed": "2026-10-06",
+    "license": "Apache-2.0",
+    "repo": "https://github.com/sunblaze-ucb/cybergym-e2e",
+    "revision": "d0ae0f02e76ebc084389bf21e755f4b41ac9765a",
+    "tasks": 920,
+    "tasks_file": "scripts/tasks.txt",
+    "tasks_sha256": "72f2604980c897fa21b7abf98682d1f74907f68fcf3a8764271ff234a1bf81be"
+  }
+}

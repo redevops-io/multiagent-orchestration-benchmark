@@ -18,6 +18,7 @@ Across 11 paired comparisons, gate-pass was 11/11 in both arms and cost, quality
 - `python3 validate_gates.py` (needs `kotlinc` and JDK 17+, no API keys) and `harness/bench.py` for paired trials (needs API keys in the environment).
 - `python3 governed/run_governed.py` (needs an `agentic-os` checkout or install; no API keys, no model calls): `results/governed_properties.json` records the last run and the `agentic-os` revision it ran against.
 - `python3 soc2_accuracy/run_soc2.py` (needs an `agentic-os` checkout; no API keys, no model calls): `results/soc2_assessment_accuracy.json`, a separate lane with its own gates and no aggregate score.
+- `python3 -m pytest cybergym_e2e/test_cybergym_adapter.py`: contract tests for the CyberGym-E2E lane's scoring, labelling, leakage audit and pilot selection (synthetic fixtures; no CyberGym run has been made and there are no CyberGym results).
 
 ## Not supported / not established
 
