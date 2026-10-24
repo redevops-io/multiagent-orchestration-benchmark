@@ -1,0 +1,78 @@
+{
+  "agentic_os": "853cb4d77998",
+  "profile": "production",
+  "python": "3.12.15",
+  "scenarios": {
+    "child_agent_tree": {
+      "checks": 10049,
+      "first_violations": [],
+      "sample_meta": {
+        "active_at_end": 0,
+        "agents": 5,
+        "operations": 37
+      },
+      "seconds": 3.3,
+      "seeds": 40,
+      "violations": 0
+    },
+    "compaction_fuzz": {
+      "checks": 5239,
+      "first_violations": [],
+      "sample_meta": {
+        "histories": 30
+      },
+      "seconds": 0.1,
+      "seeds": 40,
+      "violations": 0
+    },
+    "fork_crash_restart": {
+      "checks": 836,
+      "first_violations": [],
+      "sample_meta": {
+        "applied_on_timeout": false,
+        "b_attempts": 2,
+        "crash_points": 19,
+        "uncrashed_points": 2
+      },
+      "seconds": 2.0,
+      "seeds": 3,
+      "violations": 0
+    },
+    "goal_loop_chaos": {
+      "checks": 1013,
+      "first_violations": [],
+      "sample_meta": {
+        "final": "limit",
+        "goal_caps": [
+          "d",
+          "c"
+        ],
+        "iterations": 5,
+        "max_iterations": 5,
+        "modes": {
+          "a": "fail",
+          "b": "fail",
+          "c": "ok",
+          "d": "ok",
+          "e": "ok",
+          "f": "ok"
+        },
+        "resends_after_negative": 0
+      },
+      "seconds": 2.5,
+      "seeds": 40,
+      "violations": 0
+    },
+    "projects_routes": {
+      "checks": 45,
+      "first_violations": [],
+      "sample_meta": {
+        "human_decisions": 8,
+        "write_routes": 18
+      },
+      "seconds": 0.2,
+      "seeds": 1,
+      "violations": 0
+    }
+  }
+}

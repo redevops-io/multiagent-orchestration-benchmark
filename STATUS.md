@@ -16,11 +16,12 @@ Across 11 paired comparisons, gate-pass was 11/11 in both arms and cost, quality
 ## Supported
 
 - `python3 validate_gates.py` (needs `kotlinc` and JDK 17+, no API keys) and `harness/bench.py` for paired trials (needs API keys in the environment).
+- `python3 governed/run_governed.py` (needs an `agentic-os` checkout or install; no API keys, no model calls): `results/governed_properties.json` records the last run and the `agentic-os` revision it ran against.
 
 ## Not supported / not established
 
 - No re-run was done for this documentation change; the results have not been reproduced outside ReDevOps.
-- The result is a mechanism test, not a leaderboard, and does not measure governed-runtime properties such as authority, approval, replay or audit.
+- The paired experiment is a mechanism test, not a leaderboard, and does not measure governed-runtime properties such as authority, approval, replay or audit. A separate offline suite, `governed/`, checks some of those properties for `agentic-os` with seeded faults (see `governed/README.md` for what it covers and its limits); it does not change the experiment's results.
 
 ## Known issues
 
