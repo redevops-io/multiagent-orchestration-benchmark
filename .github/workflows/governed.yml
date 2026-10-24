@@ -1,0 +1,49 @@
+name: governed
+# The governed-properties suite (governed/): offline, no model calls, no API keys. It runs against the default branch of agentic-os, and a negative control
+# runs one scenario against an older revision that lacks the behaviour and requires it to FAIL, so the suite cannot quietly stop detecting anything.
+on:
+  pull_request:
+  push:
+    branches: ["master"]
+  schedule:
+    - cron: "17 5 * * 1"
+permissions:
+  contents: read
+jobs:
+  governed-properties:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: redevops-io/agentic-os
+          path: agentic-os
+      - uses: actions/checkout@v4
+        with:
+          repository: redevops-io/agentic-os
+          path: agentic-os-before-fork-parity
+          ref: 05dd311424433cf25344f93927b2b08a47e1d05d
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install agentic-os and its dependencies
+        run: pip install ./agentic-os
+      - name: Suite against the current agentic-os
+        run: python governed/run_governed.py --agentic-os agentic-os --seeds 12
+      - name: Negative control (must fail)
+        run: |
+          if python governed/run_governed.py --agentic-os agentic-os-before-fork-parity --only fork_crash_restart --seeds 2 --out "$RUNNER_TEMP/control.json"; then
+            echo "the suite did not detect the missing fork reconciliation parity" >&2
+            exit 1
+          fi
+          python - <<'PY'
+          import json, os
+          d = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "control.json")))
+          assert d["scenarios"]["fork_crash_restart"]["violations"] > 0, d
+          print("negative control failed as required:", d["scenarios"]["fork_crash_restart"]["violations"], "violations")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: governed_properties
+          path: results/governed_properties.json

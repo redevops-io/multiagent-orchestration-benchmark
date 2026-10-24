@@ -28,6 +28,10 @@ python3 validate_gates.py     # re-checks the deterministic gates against refere
 
 A full paired trial (`python3 harness/bench.py <shape> <seed>`) needs API keys for three model providers and is not a 3-minute task; see "Reproduce".
 
+**Governed-runtime properties (separate, added later).** The experiment above does not measure authority, approval, replay or reconciliation of unknown outcomes. A separate offline suite,
+[governed/](governed/), checks some of those guarantees for the ReDevOps runtime with seeded fault injection and an oracle: `python3 governed/run_governed.py`
+(needs an [`agentic-os`](https://github.com/redevops-io/agentic-os) checkout; no API keys). It is not part of the paired comparison and changes none of its results.
+
 **Evidence.** [results/final_report.json](results/final_report.json), [results/full_matrix.json](results/full_matrix.json), [writeup/does-formal-orchestration-help.md](writeup/does-formal-orchestration-help.md).
 
 **Limitations.** See the Scope-of-the-claim paragraph and the write-up's "What would change the verdict" section.
