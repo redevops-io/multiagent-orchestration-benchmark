@@ -53,15 +53,30 @@ jobs:
           repository: redevops-io/context-runtime
           ref: ${{ steps.pins.outputs.context_runtime }}
           path: context-runtime
+      - uses: actions/checkout@v4
+        with:
+          repository: redevops-io/redevops-rag
+          ref: ${{ steps.pins.outputs.redevops_rag }}
+          path: redevops-rag
+      - name: Read the defective revision
+        id: bad
+        run: python3 -c "import json; print('rev=' + json.load(open('runtime_adversarial/PINS.json'))['defective_revisions']['rag_indexer_identity']['revision'])" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: redevops-io/agentic-os
+          ref: ${{ steps.bad.outputs.rev }}
+          path: agentic-os-defective
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Install agentic-os and its dependencies
         run: pip install ./agentic-os
+      - name: Install redevops-rag without its encoder dependencies (the scenarios use a deterministic stand-in encoder; the store, retrieval and namespace code under test are the real ones)
+        run: pip install --no-deps ./redevops-rag duckdb numpy
       - name: Run the lane (a skipped scenario fails it)
         env:
           RUNNER_IMAGE_DIGEST: ${{ runner.os }}-${{ runner.arch }}-${{ env.ImageVersion }}
-        run: python runtime_adversarial/run_lane.py --agentic-os agentic-os --agent-harness agent-harness --context-runtime context-runtime --require-all --out "$RUNNER_TEMP/runtime_adversarial.json"
+        run: python runtime_adversarial/run_lane.py --agentic-os agentic-os --agent-harness agent-harness --context-runtime context-runtime --redevops-rag redevops-rag --require-all --out "$RUNNER_TEMP/runtime_adversarial.json"
       - name: Control for the false-denial counters (an over-denying guard must be safe AND be caught)
         run: |
           GOVERNED_OVERDENY=1 python governed/run_governed.py --agentic-os agentic-os --agent-harness agent-harness --context-runtime context-runtime \
@@ -75,6 +90,20 @@ jobs:
               assert r["false_denial_rate"] is not None and r["false_denial_rate"] >= 0.9, (name, "the false-denial counter did not notice an over-denying guard", r["false_denial_rate"])
               print(name, "over-denial detected:", r["legitimate_refused"], "of", r["legitimate_actions"])
           PY
+      - name: Defect-seeded controls (each seeded defect MUST be caught; a check that cannot fail proves nothing)
+        run: |
+          set -u
+          must_fail() { name="$1"; shift; if "$@" >"$RUNNER_TEMP/ctl.log" 2>&1; then echo "::error::$name: the seeded defect was NOT caught"; tail -5 "$RUNNER_TEMP/ctl.log"; exit 1; else echo "caught: $name"; fi; }
+          gov() { python governed/run_governed.py --agentic-os agentic-os --only "$1" --seeds 6 --out "$RUNNER_TEMP/ctl.json"; }
+          GOVERNED_CROSS_MODEL_BUG=subject_key must_fail "delegation: identity taken from a caller-supplied name" gov cross_model_delegation
+          for b in no_scope empty_means_all prefix_scope; do
+            GOVERNED_RETRIEVAL_BUG=$b must_fail "retrieval: $b" gov retrieval_isolation
+          done
+          GOVERNED_INDEXER_BUG=join must_fail "indexer: pair joined into a file name" gov rag_indexer_identity
+          must_fail "indexer: the pre-fix agentic-os revision (index files shared between different pairs)" python governed/run_governed.py --agentic-os agentic-os-defective --only rag_indexer_identity --seeds 12 --out "$RUNNER_TEMP/old.json"
+          RA_NETWORK_BUG=open_network must_fail "network: internal network created open" python runtime_adversarial/infra.py --agentic-os agentic-os --only network_isolation
+          RA_PINNING_BUG=accept_all must_fail "pinning: checker accepts every reference" python runtime_adversarial/infra.py --agentic-os agentic-os --only image_pinning
+          RA_LOG_BUG=no_verify must_fail "log: verifier that accepts everything" python runtime_adversarial/infra.py --agentic-os agentic-os --only log_chain
       - uses: actions/upload-artifact@v4
         if: always()
         with:

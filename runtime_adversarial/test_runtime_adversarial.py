@@ -39,7 +39,7 @@ def res(**kw):
 # ───────────────────────── the committed data ─────────────────────────
 def test_every_item_is_well_formed_and_ids_are_unique():
     ids = [i["id"] for i in COVERAGE["items"]]
-    assert len(ids) == len(set(ids)) == 40
+    assert len(ids) == len(set(ids)) == 41
     assert all(i["family"] in RL.FAMILIES and i["item"] and isinstance(i["governed"], list) and isinstance(i["source_tests"], list) for i in COVERAGE["items"])
     assert {i["family"] for i in COVERAGE["items"]} == set(RL.FAMILIES)
 
@@ -53,14 +53,14 @@ def test_every_governed_scenario_a_mapping_names_is_registered():
 def test_every_registered_scenario_declares_its_controls_and_only_instrumented_ones_claim_a_false_denial_rate():
     assert set(CONTROLS["scenarios"]) == set(S.SCENARIOS)
     measured = {n for n, c in CONTROLS["scenarios"].items() if c["false_denial_rate_measured"]}
-    assert measured == {"child_agent_tree", "projects_routes", "agent_in_the_loop", "provider_reconciliation"}
+    assert measured == {"child_agent_tree", "projects_routes", "agent_in_the_loop", "provider_reconciliation", "cross_model_delegation", "retrieval_isolation", "rag_indexer_identity"}
     for name, c in CONTROLS["scenarios"].items():
         assert set(c) - {"legitimacy"} == set(KEYS), name
         assert bool(c.get("legitimacy")) == c["false_denial_rate_measured"], f"{name}: a scenario that measures false denials must say what 'legitimate' means, and one that does not must not"
 
 
-def test_the_pins_are_full_commit_hashes_for_all_three_sources():
-    for k in ("agentic-os", "agent-harness", "context-runtime"):
+def test_the_pins_are_full_commit_hashes_for_all_sources():
+    for k in ("agentic-os", "agent-harness", "context-runtime", "redevops-rag"):
         assert len(PINS["sources"][k]["revision"]) == 40 and all(c in "0123456789abcdef" for c in PINS["sources"][k]["revision"])
 
 
@@ -75,7 +75,7 @@ def test_a_passing_governed_scenario_beats_a_named_test_and_a_named_test_beats_n
     co = tree(tmp_path, {"tests/test_a.py": "def test_the_thing_holds():\n    pass\n"})
     c = RL.evaluate_coverage(cov((["projects_routes"], []), ([], [{"file": "tests/test_a.py", "name": "the_thing_holds"}]), ([], [])), res(projects_routes={}), set(S.SCENARIOS), co)
     assert [i["status"] for i in c["items"]] == ["has_governed_scenario", "has_named_test", "not_tested"]
-    assert c["by_family"]["authority"] == {"items": 3, "has_governed_scenario": 1, "has_named_test": 1, "not_tested": 1, "failing": 0}
+    assert c["by_family"]["authority"] == {"items": 3, "has_governed_scenario": 1, "has_infra_check": 0, "has_named_test": 1, "not_tested": 1, "failing": 0}
 
 
 def test_a_failing_scenario_makes_the_item_failing_not_covered():
@@ -153,9 +153,15 @@ def test_manifest_problems_name_what_is_missing():
 
 
 # ───────────────────────── the runner's exit codes ─────────────────────────
-def run_cli(tmp_path, governed: dict, *flags, agentic_os=None):
+INFRA_OK = {n: {"id": n, "status": "pass"} for n in ("network_isolation", "image_pinning", "log_chain")}
+
+
+def run_cli(tmp_path, governed: dict, *flags, agentic_os=None, infra=None):
     gp = tmp_path / "g.json"
     gp.write_text(json.dumps(governed))
+    ip = tmp_path / "i.json"
+    ip.write_text(json.dumps(INFRA_OK if infra is None else infra))
+    flags = ("--infra-results", str(ip), *flags)
     out = tmp_path / "out.json"
     r = subprocess.run([sys.executable, str(ROOT / "runtime_adversarial" / "run_lane.py"), "--agentic-os", agentic_os or str(tmp_path), "--governed-results", str(gp), "--out", str(out), *flags],
                        capture_output=True, text=True)
@@ -223,3 +229,91 @@ def test_the_cli_report_carries_the_rates_from_the_suite_results(tmp_path):
     _, rep, _ = run_cli(tmp_path, g, "--allow-unpinned")
     fd = rep["false_denials"]["by_scenario"]
     assert fd["child_agent_tree"]["rate"] == 0.04 and fd["goal_loop_chaos"] == "not measured"
+
+
+# ───────────────────────── infrastructure checks ─────────────────────────
+def infra_cov(*names):
+    return {"items": [{"id": "X0", "family": "infrastructure", "item": "t", "governed": [], "source_tests": [], "infra": list(names), "note": ""}]}
+
+
+def test_an_infra_check_that_passed_covers_its_item_and_one_that_did_not_run_never_does():
+    ok = RL.evaluate_coverage(infra_cov("a"), {}, set(), None, {"a": {"status": "pass"}})
+    assert ok["items"][0]["status"] == "has_infra_check"
+    for st in ("not_tested", "error"):
+        c = RL.evaluate_coverage(infra_cov("a"), {}, set(), None, {"a": {"status": st}})
+        assert c["items"][0]["status"] == "not_tested" and c["items"][0]["infra_not_run"] == ["a"]
+    assert RL.evaluate_coverage(infra_cov("a"), {}, set(), None, None)["items"][0]["status"] == "not_tested"
+    assert RL.evaluate_coverage(infra_cov("a"), {}, set(), None, {"a": {"status": "fail"}})["items"][0]["status"] == "failing"
+
+
+def test_an_item_with_two_checks_is_covered_only_when_both_ran_and_passed():
+    c = RL.evaluate_coverage(infra_cov("a", "b"), {}, set(), None, {"a": {"status": "pass"}, "b": {"status": "not_tested"}})
+    assert c["items"][0]["status"] == "not_tested"
+
+
+def test_the_four_formerly_untested_categories_are_now_mapped_to_something_that_runs():
+    items = {i["id"]: i for i in COVERAGE["items"]}
+    assert items["A07"]["governed"] == ["cross_model_delegation"]
+    assert set(items["C04"]["governed"]) == {"retrieval_isolation", "rag_indexer_identity"}
+    assert items["I02"]["infra"] == ["network_isolation"] and items["I04"]["infra"] == ["image_pinning"] and items["I05"]["infra"] == ["log_chain"]
+
+
+def test_a_failing_infra_check_exits_one_and_an_errored_one_exits_two(tmp_path):
+    bad = {**INFRA_OK, "image_pinning": {"id": "image_pinning", "status": "fail"}}
+    code, rep, _ = run_cli(tmp_path, GOOD, "--allow-unpinned", infra=bad)
+    assert code == 1 and rep["coverage"]["items"] and any(i["status"] == "failing" for i in rep["coverage"]["items"])
+    err = {**INFRA_OK, "log_chain": {"id": "log_chain", "status": "error", "reason": "boom"}}
+    assert run_cli(tmp_path, GOOD, "--allow-unpinned", infra=err)[0] == 2
+
+
+def test_an_infra_check_that_could_not_run_makes_the_run_partial_and_fails_require_all(tmp_path):
+    nt = {**INFRA_OK, "network_isolation": {"id": "network_isolation", "status": "not_tested", "reason": "no docker"}}
+    c1, rep, _ = run_cli(tmp_path, GOOD, "--allow-unpinned", infra=nt)
+    c2, _, _ = run_cli(tmp_path, GOOD, "--allow-unpinned", "--require-all", infra=nt)
+    assert c1 == 0 and rep["manifest"]["status"] == "partial" and rep["manifest"]["not_tested"]["infra_checks"] == ["network_isolation"] and c2 == 2
+
+
+# the checks themselves, on small synthetic trees (the docker one needs a daemon and runs in the lane)
+sys.path.insert(0, str(ROOT / "runtime_adversarial"))
+import infra as I                                         # noqa: E402
+
+
+def test_the_image_classifier_agrees_with_its_truth_table():
+    for ref, want in I.FIXTURES:
+        assert I.classify_ref(ref) == want, ref
+
+
+def test_the_image_scan_reads_dockerfiles_and_yaml_and_skips_stage_names_and_comments(tmp_path):
+    tree(tmp_path, {"Dockerfile": I.DOCKERFILE_FIXTURE, "deploy/c.yml": I.YAML_FIXTURE, "notes.md": "image: ignored:1"})
+    got = {(f, r, c) for f, r, c in I.scan_images(tmp_path)}
+    assert ("Dockerfile", "python:3.12", "mutable") in got and ("Dockerfile", "python@sha256:" + "b" * 64, "immutable") in got
+    assert ("deploy/c.yml", "y:1", "mutable") in got and not any(f == "notes.md" for f, _, _ in got)
+    assert not any(r in ("scratch", "build") for _, r, _ in got)
+
+
+def test_a_new_mutable_reference_outside_the_baseline_fails_the_check(tmp_path):
+    tree(tmp_path, {"Dockerfile": "FROM python:9.9\n"})
+    r = I.check_image_pinning(str(tmp_path))
+    assert r.status == "fail" and any("python:9.9" in c["detail"] for c in r.checks if not c["ok"])
+
+
+def test_the_log_chain_check_passes_on_the_real_store_and_fails_when_the_verifier_is_blind(monkeypatch):
+    import os
+    ao = os.environ.get("AGENTIC_OS_CHECKOUT")
+    if not ao:
+        pytest.skip("set AGENTIC_OS_CHECKOUT to a checkout of agentic-os to run the log-chain check here (the lane runs it against the pinned revision)")
+    assert I.check_log_chain(ao).status == "pass"
+    monkeypatch.setenv("RA_LOG_BUG", "no_verify")
+    assert I.check_log_chain(ao).status == "fail"
+
+
+def test_k8s_static_check_accepts_a_default_deny_and_flags_an_open_rule_on_any_pod(tmp_path):
+    good = ("kind: NetworkPolicy\nmetadata: {name: a}\nspec:\n  podSelector: {}\n  policyTypes: [Egress]\n---\nkind: NetworkPolicy\nmetadata: {name: b}\nspec:\n  podSelector:\n    matchLabels: {app: egress-proxy}\n  egress:\n"
+            "    - to:\n        - ipBlock:\n            cidr: 0.0.0.0/0\n            except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16, 100.64.0.0/10]\n---\nkind: NetworkPolicy\nmetadata: {name: c}\nspec:\n  podSelector: {}\n")
+    p = tmp_path / "p.yaml"
+    p.write_text(good)
+    assert all(ok for _, ok, _ in I._k8s_static(p))
+    p.write_text(good.replace("matchLabels: {app: egress-proxy}", "matchLabels: {app: web}"))
+    assert not all(ok for _, ok, _ in I._k8s_static(p))
+    p.write_text(good.replace("169.254.0.0/16, ", ""))
+    assert not all(ok for _, ok, _ in I._k8s_static(p))

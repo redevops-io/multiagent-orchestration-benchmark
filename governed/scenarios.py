@@ -545,6 +545,17 @@ def _register_agent_loop() -> None:
     SCENARIOS["agent_in_the_loop"] = (s6_agent_in_the_loop, 30)
 
 
+def _register_cross_model_delegation() -> None:
+    from .delegation import s8_cross_model_delegation
+    SCENARIOS["cross_model_delegation"] = (s8_cross_model_delegation, 40)
+
+
+def _register_retrieval() -> None:
+    from .retrieval import s9_retrieval_isolation, s10_rag_indexer_identity
+    SCENARIOS["retrieval_isolation"] = (s9_retrieval_isolation, 20)
+    SCENARIOS["rag_indexer_identity"] = (s10_rag_indexer_identity, 40)
+
+
 def _register_provider_reconciliation() -> None:
     from .provider_recon import s7_provider_reconciliation
     SCENARIOS["provider_reconciliation"] = (s7_provider_reconciliation, 60)
@@ -552,3 +563,5 @@ def _register_provider_reconciliation() -> None:
 
 _register_agent_loop()
 _register_provider_reconciliation()
+_register_cross_model_delegation()
+_register_retrieval()

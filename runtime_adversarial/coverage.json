@@ -16,7 +16,8 @@
           "name": "production_fleet_cannot_be_built_without_a_durable_guard"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "A02",
@@ -37,7 +38,8 @@
           "name": "standing_grant_satisfies_an_ordinary_migrated_gate"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "A03",
@@ -60,7 +62,8 @@
           "name": "expiry_denies"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "A04",
@@ -79,7 +82,8 @@
           "name": "other_tenants_envelope_is_not_usable"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "A05",
@@ -96,7 +100,8 @@
           "name": "tampered_envelope_refused"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "A06",
@@ -112,15 +117,19 @@
           "name": "a_child_can_never_exceed_its_parent"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "A07",
       "family": "authority",
       "item": "cross-model delegation",
-      "governed": [],
+      "governed": [
+        "cross_model_delegation"
+      ],
       "source_tests": [],
-      "note": "Not tested: no scenario delegates across models."
+      "note": "S8 attacks authority that is meant to be model-independent: children labelled with different models, grandchildren, claims in the request, forged or re-signed or swapped credentials, a wrong client or tenant, an `agent:` identity with no credential, closed and superseded credentials, spawns beyond the parent. It scripts no real model: whether a model can talk a parent into granting more is out of scope; that a delegated agent cannot exceed what it was given is what is checked. A credential omitted altogether falls back to the app principal's own authority, which is a deployment boundary and is recorded, not asserted.",
+      "infra": []
     },
     {
       "id": "A08",
@@ -137,7 +146,8 @@
           "name": "active_children_are_capped_atomically"
         }
       ],
-      "note": "A test is named for it; whether it uses 16 or more workers is not established here."
+      "note": "A test is named for it; whether it uses 16 or more workers is not established here.",
+      "infra": []
     },
     {
       "id": "A09",
@@ -148,7 +158,8 @@
         "agent_in_the_loop"
       ],
       "source_tests": [],
-      "note": "The Projects API write routes and direct gateway calls only; other REST surfaces are not covered."
+      "note": "The Projects API write routes and direct gateway calls only; other REST surfaces are not covered.",
+      "infra": []
     },
     {
       "id": "A10",
@@ -161,7 +172,8 @@
           "name": "background_jobs_are_inside_the_envelope_too"
         }
       ],
-      "note": "Fleet only; no webhook path is tested."
+      "note": "Fleet only; no webhook path is tested.",
+      "infra": []
     },
     {
       "id": "A11",
@@ -184,7 +196,8 @@
           "name": "the_production_profile_requires_a_durable_guard"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R01",
@@ -200,7 +213,8 @@
           "name": "a_side_effecting_call_that_errors_after_it_may_have_been_sent_parks_instead_of_failing"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R02",
@@ -215,7 +229,8 @@
           "name": "the_park_survives_repeated_restarts_and_nothing_runs_while_parked"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R03",
@@ -230,7 +245,8 @@
           "name": "running_a_parked_mission_is_a_no_op_that_writes_nothing"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R04",
@@ -243,7 +259,8 @@
           "name": "executed_settles_it_marks_the_node_done_without_calling_the_handler"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R05",
@@ -260,7 +277,8 @@
           "name": "cancel_before_dispatch_releases_and_a_rereserve_is_fresh"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R06",
@@ -275,7 +293,8 @@
           "name": "a_generic_http_404_is_inconclusive_never_a_confirmed_negative"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R07",
@@ -290,7 +309,8 @@
           "name": "probes_only_ever_read"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R08",
@@ -305,7 +325,8 @@
           "name": "a_restart_does_not_reset_the_retry_budget"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R09",
@@ -324,7 +345,8 @@
           "name": "all_join_failure_keeps_sibling_work_and_does_not_compensate"
         }
       ],
-      "note": "The governed scenario uses an ALL join only; no QUORUM test was found."
+      "note": "The governed scenario uses an ALL join only; no QUORUM test was found.",
+      "infra": []
     },
     {
       "id": "R10",
@@ -341,7 +363,8 @@
           "name": "mission_end_releases_reservations_that_never_dispatched"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R11",
@@ -358,7 +381,8 @@
           "name": "mission_end_never_releases_a_dispatched_reservation"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "R12",
@@ -375,7 +399,8 @@
           "name": "only_one_replica_can_own_a_mission_and_every_takeover_advances_the_fence"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "U01",
@@ -392,7 +417,8 @@
           "name": "stale_driver_cannot_renew_or_restamp_a_newer_claim"
         }
       ],
-      "note": "The tests are about credential and claim renewal; a test that renewal never extends the OWNER's envelope was not found."
+      "note": "The tests are about credential and claim renewal; a test that renewal never extends the OWNER's envelope was not found.",
+      "infra": []
     },
     {
       "id": "U02",
@@ -411,7 +437,8 @@
           "name": "a_restart_keeps_counters_so_a_crash_cannot_buy_more_replans"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "U03",
@@ -434,7 +461,8 @@
           "name": "a_deadline_in_the_past_stops_before_anything_is_dispatched"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "U04",
@@ -449,7 +477,8 @@
           "name": "the_goal_completes_only_when_an_independent_verifier_confirms_with_evidence"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "U05",
@@ -464,7 +493,8 @@
           "name": "cancel_branch_does_not_cancel_siblings_unless_policy_says_so"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "U06",
@@ -485,7 +515,8 @@
           "name": "a_cancelled_loop_ends_its_children"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "U07",
@@ -512,7 +543,8 @@
           "name": "a_revoked_child_is_not_a_lost_child_and_is_never_revived"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "U08",
@@ -528,7 +560,8 @@
           "name": "the_active_time_ceiling_is_durable_across_a_restart"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "C01",
@@ -547,7 +580,8 @@
           "name": "a_planted_look_alike_pin_is_removed_and_reported_as_tampering"
         }
       ],
-      "note": ""
+      "note": "",
+      "infra": []
     },
     {
       "id": "C02",
@@ -560,7 +594,8 @@
           "name": "untrusted_content_is_fenced_for_the_summarizer_and_the_summary_is_not_given_the_system_role"
         }
       ],
-      "note": "The tests are about trust labelling and fencing; a test that source provenance fields survive was not found."
+      "note": "The tests are about trust labelling and fencing; a test that source provenance fields survive was not found.",
+      "infra": []
     },
     {
       "id": "C03",
@@ -570,15 +605,20 @@
         "agent_in_the_loop"
       ],
       "source_tests": [],
-      "note": "The scenario's model obeys injected text; the gateway refuses what the envelope does not cover."
+      "note": "The scenario's model obeys injected text; the gateway refuses what the envelope does not cover.",
+      "infra": []
     },
     {
       "id": "C04",
       "family": "context",
       "item": "retrieved data obeys the tenant ACL",
-      "governed": [],
+      "governed": [
+        "retrieval_isolation",
+        "rag_indexer_identity"
+      ],
       "source_tests": [],
-      "note": "Not tested here: retrieval lives in the context-runtime and RAG repositories."
+      "note": "redevops-rag has no per-document ACLs (its README leaves tenant scoping to the caller). S9 checks the primitives a caller uses to do that (namespace guard, `document_ids` scoping on the semantic, BM25 and hybrid legs, folder expansion) from a written-down corpus and ACL, including the text handed to a model; S10 checks agentic-os's per-(project, source) index identity. What an unguarded shared store returns to a caller that forgets to scope is reported, not asserted. Document-level ACL enforcement inside one tenant's store is the caller's job and is tested here only as far as `document_ids` goes.",
+      "infra": []
     },
     {
       "id": "C05",
@@ -588,7 +628,8 @@
         "agent_in_the_loop"
       ],
       "source_tests": [],
-      "note": "The scenario's model copies a context stub into an argument; one stub form only."
+      "note": "The scenario's model copies a context stub into an argument; one stub form only.",
+      "infra": []
     },
     {
       "id": "I01",
@@ -613,7 +654,8 @@
           "name": "a_memory_ceiling_that_cannot_be_applied_is_refused_by_name_before_anything_runs"
         }
       ],
-      "note": "Python components only; no network-namespace or container-level test."
+      "note": "Python components only; no network-namespace or container-level test.",
+      "infra": []
     },
     {
       "id": "I02",
@@ -621,7 +663,10 @@
       "item": "Docker and network policies are tested, not only the Python wrapper",
       "governed": [],
       "source_tests": [],
-      "note": "Not tested: no container or Kubernetes network policy is exercised."
+      "note": "Live: a throwaway INTERNAL docker network, the repository's own egress proxy image, an origin whose own log is the oracle. The Kubernetes NetworkPolicy manifest is checked statically; its enforcement by a cluster is NOT tested (needs a policy-enforcing CNI).",
+      "infra": [
+        "network_isolation"
+      ]
     },
     {
       "id": "I03",
@@ -638,15 +683,30 @@
           "name": "encrypted_file_rotate_and_revoke"
         }
       ],
-      "note": "Process-level containment and store rotation; not a container image scan."
+      "note": "Process-level containment and store rotation; not a container image scan.",
+      "infra": []
     },
     {
       "id": "I04",
       "family": "infrastructure",
-      "item": "immutable image pinning and tamper-evident logs",
+      "item": "immutable image pinning",
       "governed": [],
       "source_tests": [],
-      "note": "Not tested: no image-pinning or log-chain check is in this lane."
+      "note": "Every image reference in the tracked Dockerfiles, compose files and manifests is classified immutable (full sha256 digest) or mutable; the classifier is checked against seeded fixtures; the mutable references that exist are listed as open findings and may only shrink. Whether a digest exists in a registry is not tested here.",
+      "infra": [
+        "image_pinning"
+      ]
+    },
+    {
+      "id": "I05",
+      "family": "infrastructure",
+      "item": "tamper-evident logs",
+      "governed": [],
+      "source_tests": [],
+      "infra": [
+        "log_chain"
+      ],
+      "note": "The mission event log's hash chain against edits, deletions, reordering, insertion, replay and hash-stripping. Tail truncation, a valid-looking appended event and a consistent rewrite are not visible to the chain alone; they are caught only by an anchored head, and are listed as known limits. The enterprise overlay carries a separate store that is not exercised here."
     }
   ]
 }
