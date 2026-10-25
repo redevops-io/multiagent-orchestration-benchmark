@@ -1,0 +1,50 @@
+[
+ {
+  "arm": "baseline-subset",
+  "trial": 0,
+  "evaluation": null,
+  "error": "the run did not complete: ason = self._read_status()\n                              ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/http/client.py\", line 312, in _read_status\n    raise RemoteDisconnected(\"Remote end closed connection without\"\nhttp.client.RemoteDisconnected: Remote end closed connection without response\n"
+ },
+ {
+  "arm": "baseline-free",
+  "trial": 0,
+  "evaluation": null,
+  "error": "the run did not complete: ason = self._read_status()\n                              ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/http/client.py\", line 312, in _read_status\n    raise RemoteDisconnected(\"Remote end closed connection without\"\nhttp.client.RemoteDisconnected: Remote end closed connection without response\n"
+ },
+ {
+  "arm": "baseline-subset",
+  "trial": 2,
+  "evaluation": null,
+  "error": "the run did not complete: ason = self._read_status()\n                              ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/http/client.py\", line 312, in _read_status\n    raise RemoteDisconnected(\"Remote end closed connection without\"\nhttp.client.RemoteDisconnected: Remote end closed connection without response\n"
+ },
+ {
+  "arm": "baseline-free",
+  "trial": 2,
+  "evaluation": null,
+  "error": "the run did not complete: ason = self._read_status()\n                              ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/http/client.py\", line 312, in _read_status\n    raise RemoteDisconnected(\"Remote end closed connection without\"\nhttp.client.RemoteDisconnected: Remote end closed connection without response\n"
+ },
+ {
+  "arm": "governed",
+  "trial": 2,
+  "evaluation": null,
+  "error": "the run did not complete: ason = self._read_status()\n                              ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/http/client.py\", line 312, in _read_status\n    raise RemoteDisconnected(\"Remote end closed connection without\"\nhttp.client.RemoteDisconnected: Remote end closed connection without response\n"
+ },
+ {
+  "arm": "baseline-subset",
+  "trial": 3,
+  "evaluation": null,
+  "error": "the run did not complete: ason = self._read_status()\n                              ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/http/client.py\", line 312, in _read_status\n    raise RemoteDisconnected(\"Remote end closed connection without\"\nhttp.client.RemoteDisconnected: Remote end closed connection without response\n"
+ },
+ {
+  "arm": "baseline-free",
+  "trial": 3,
+  "evaluation": null,
+  "error": "the run did not complete: ason = self._read_status()\n                              ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/http/client.py\", line 312, in _read_status\n    raise RemoteDisconnected(\"Remote end closed connection without\"\nhttp.client.RemoteDisconnected: Remote end closed connection without response\n"
+ },
+ {
+  "arm": "governed",
+  "trial": 4,
+  "evaluation": null,
+  "error": "the run did not complete: ason = self._read_status()\n                              ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/http/client.py\", line 312, in _read_status\n    raise RemoteDisconnected(\"Remote end closed connection without\"\nhttp.client.RemoteDisconnected: Remote end closed connection without response\n"
+ }
+]
