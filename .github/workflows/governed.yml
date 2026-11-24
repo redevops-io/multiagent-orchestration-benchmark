@@ -32,7 +32,6 @@ jobs:
         with:
           repository: redevops-io/context-runtime
           path: context-runtime
-          ref: v4
       - uses: actions/checkout@v4
         with:
           repository: redevops-io/agentic-os
