@@ -497,7 +497,9 @@ def s5_projects_routes(seed: int, tmp: Path) -> Result:
         human_only = [r for r in routes if any(w in r for w in decision_words) and not r.endswith("/batch/undo")]
         for route in routes:
             method, path = route.split(" ", 1)
-            path = re.sub(r"\{(\w+)\}", lambda m: params[m.group(1)], path)
+            # a path parameter this scenario has no value for (a route added to the runtime since) gets a placeholder: the route is
+            # still called, so a new write route is checked the day it appears instead of stopping the scenario
+            path = re.sub(r"\{(\w+)\}", lambda m: params.get(m.group(1), "x1"), path)
             before = len(spy.__dict__["_log"])
             r = c.request(method, path, json={})
             out.check(r.status_code in (401, 403) and len(spy.__dict__["_log"]) == before, f"{route}: an unauthenticated write was not refused before the handler ({r.status_code})")
@@ -506,7 +508,7 @@ def s5_projects_routes(seed: int, tmp: Path) -> Result:
             out.check(r.status_code in (401, 403), f"{route}: a wrong operator credential was accepted ({r.status_code})")
         for route in human_only:
             method, path = route.split(" ", 1)
-            path = re.sub(r"\{(\w+)\}", lambda m: params[m.group(1)], path)
+            path = re.sub(r"\{(\w+)\}", lambda m: params.get(m.group(1), "x1"), path)
             r = c.request(method, path, json={}, headers={"X-Service-Token": f"svc-{seed}"})
             out.check(r.status_code == 403, f"{route}: a service identity made a human decision ({r.status_code})")
         good = {"Authorization": "Basic " + base64.b64encode(os.environ["OPERATOR_BASIC_AUTH"].encode()).decode()}
@@ -516,7 +518,7 @@ def s5_projects_routes(seed: int, tmp: Path) -> Result:
         # made-up body is the handler's business, not the authorization layer's.
         for route in routes:
             method, path = route.split(" ", 1)
-            path = re.sub(r"\{(\w+)\}", lambda m: params[m.group(1)], path)
+            path = re.sub(r"\{(\w+)\}", lambda m: params.get(m.group(1), "x1"), path)
             r = c.request(method, path, json={}, headers=good)
             out.legit(r.status_code not in (401, 403), f"{route}: the operator credential was refused ({r.status_code})")
         r = c.post("/api/projects/p1/capture", json={"text": "from the console"}, headers={"X-Service-Token": f"svc-{seed}"})
