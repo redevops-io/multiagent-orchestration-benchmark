@@ -133,7 +133,14 @@ def s6_agent_in_the_loop(seed: int, tmp: Path) -> Result:
             ok, text, err = _tool_result_to_text(r)
             return ToolResult(ok=ok, text=text or (err or ""), error=err)
         return run
-    registry = ToolRegistry(HarnessPolicy(mode="bypass"))       # the harness gate is open on purpose: the governed layer is what is under test
+    # The harness gate is open on purpose: the governed layer is what is under test. A current agent-harness refuses every call of a registry
+    # that names no authorizer (missing_explicit_grant), which left this scenario with nothing to measure; say so explicitly where the harness
+    # has the seam, and keep the old construction for the pinned revisions that predate it.
+    try:
+        from agent_harness.tools import local_trusted_authorizer
+        registry = ToolRegistry(HarnessPolicy(mode="bypass"), authorizer=local_trusted_authorizer(plane="governed_scenario"))
+    except ImportError:
+        registry = ToolRegistry(HarnessPolicy(mode="bypass"))
     big = "invoice ledger line " * 150
 
     def lookup(args: dict):
